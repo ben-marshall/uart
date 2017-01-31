@@ -1,4 +1,7 @@
 *.swp
 *~
+*.vcd
+
+sim.bin
 
 xilinx/
