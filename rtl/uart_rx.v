@@ -39,8 +39,11 @@ localparam FSM_BIT_7= 4'b1000;
 localparam FSM_STOP = 4'b1001;
 
 // Current and next states for the FSM.
-reg [2:0] recv_state;
-reg [2:0] n_recv_state;
+reg [3:0] recv_state;
+reg [3:0] n_recv_state;
+
+// Internal data storage.
+reg [7:0] int_data;
 
 // Counts samples per bit
 reg [7:0] sample_counter;
@@ -53,7 +56,7 @@ wire      counter_rst;
 reg [7:0] value_counter;
 
 // Did we recieve a 1 or a 0 ??
-wire      recieved_value = value_counter <= SAMPLES_THRESHOLD;
+wire      recieved_value = value_counter >= SAMPLES_THRESHOLD;
 
 //
 // When should we let the counters increment?
@@ -65,30 +68,42 @@ assign counter_en = (recv_state == FSM_START && !uart_rxd) ||
 assign counter_rst = (recv_state != n_recv_state        ) ||
                      (recv_state     == FSM_START &&
                       n_recv_state   == FSM_START &&
-                      sample_counter == SAMPLES_PER_BIT )  ;
+                      sample_counter == SAMPLES_PER_BIT ) ||
+                     (recv_state     == FSM_STOP  &&
+                      n_recv_state   == FSM_START       )  ;
 
 //
 // Let the world know we recieved a byte.
-assign recv_valid = recv_state <= FSM_STOP;
-assign break      = recv_state <= FSM_STOP && recv_data == 8'b0;
+assign recv_valid = recv_state == FSM_STOP;
+assign break      = recv_state == FSM_STOP && recv_data == 8'b0;
+
+//
+// Process for latching the captured data to the outputs.
+always @(posedge clk, negedge resetn) begin : p_uart_data_present
+    if(!resetn) begin
+        recv_data <= 8'b0;
+    end else if(recv_valid) begin
+        recv_data <= int_data;
+    end
+end
 
 //
 // Process for capturing the recieved data bits.
 always @(posedge clk, negedge resetn) begin : p_uart_data_capture
     if(!resetn) begin
-        recv_data <= 8'b0;
-    end else if(recv_state != n_recv_state) begin
+        int_data <= 8'b0;
+    end else begin
       case(recv_state)
-          FSM_BIT_0: recv_data <= {recv_data[7:1], recieved_value                };
-          FSM_BIT_1: recv_data <= {recv_data[7:2], recieved_value, recv_data[0:0]};
-          FSM_BIT_2: recv_data <= {recv_data[7:3], recieved_value, recv_data[1:0]};
-          FSM_BIT_3: recv_data <= {recv_data[7:4], recieved_value, recv_data[2:0]};
-          FSM_BIT_4: recv_data <= {recv_data[7:5], recieved_value, recv_data[3:0]};
-          FSM_BIT_5: recv_data <= {recv_data[7:6], recieved_value, recv_data[4:0]};
-          FSM_BIT_6: recv_data <= {recv_data[7:7], recieved_value, recv_data[5:0]};
-          FSM_BIT_7: recv_data <= {                recieved_value, recv_data[6:0]};
+          FSM_BIT_0: int_data <= {int_data[7:1], recieved_value                };
+          FSM_BIT_1: int_data <= {int_data[7:2], recieved_value, int_data[0:0]};
+          FSM_BIT_2: int_data <= {int_data[7:3], recieved_value, int_data[1:0]};
+          FSM_BIT_3: int_data <= {int_data[7:4], recieved_value, int_data[2:0]};
+          FSM_BIT_4: int_data <= {int_data[7:5], recieved_value, int_data[3:0]};
+          FSM_BIT_5: int_data <= {int_data[7:6], recieved_value, int_data[4:0]};
+          FSM_BIT_6: int_data <= {int_data[7:7], recieved_value, int_data[5:0]};
+          FSM_BIT_7: int_data <= {                recieved_value, int_data[6:0]};
           default:
-              recv_data <= recv_data;
+              int_data <= int_data;
       endcase
     end
 end
