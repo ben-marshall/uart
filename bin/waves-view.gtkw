@@ -1,0 +1,96 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Sat Feb  4 12:15:33 2017
+[*]
+[dumpfile] "/home/ben/projects/arty/uart/waves.vcd"
+[dumpfile_mtime] "Sat Feb  4 12:15:20 2017"
+[dumpfile_size] 34089151
+[savefile] "/home/ben/projects/arty/uart/bin/waves-view.gtkw"
+[timestart] 29200
+[size] 1920 1056
+[pos] -1 -1
+*-13.071849 81110 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[treeopen] tb.i_dut.
+[sst_width] 225
+[signals_width] 223
+[sst_expanded] 1
+[sst_vpaned_height] 320
+@800200
+-Top Level
+@22
+tb.bytes[7:0]
+@28
+tb.clk
+@22
+tb.led[3:0]
+tb.p_bytes[7:0]
+@28
+tb.resetn
+tb.rgb0[2:0]
+tb.rgb1[2:0]
+tb.rgb2[2:0]
+tb.rgb3[2:0]
+@22
+tb.sw[3:0]
+@28
+tb.uart_rxd
+@1000200
+-Top Level
+@800200
+-UART RX
+@28
+tb.i_dut.i_uart_rx.break
+tb.i_dut.i_uart_rx.clk
+tb.i_dut.i_uart_rx.counter_en
+tb.i_dut.i_uart_rx.counter_rst
+@22
+tb.i_dut.i_uart_rx.int_data[7:0]
+tb.i_dut.i_uart_rx.n_recv_state[3:0]
+@28
+tb.i_dut.i_uart_rx.recieved_value
+@22
+tb.i_dut.i_uart_rx.recv_data[7:0]
+@28
+tb.i_dut.i_uart_rx.recv_en
+@22
+tb.i_dut.i_uart_rx.recv_state[3:0]
+@28
+tb.i_dut.i_uart_rx.recv_valid
+tb.i_dut.i_uart_rx.resetn
+tb.i_dut.i_uart_rx.rx_fall_seen
+@22
+tb.i_dut.i_uart_rx.sample_counter[7:0]
+@28
+tb.i_dut.i_uart_rx.uart_rxd
+@22
+tb.i_dut.i_uart_rx.value_counter[7:0]
+@1000200
+-UART RX
+@800200
+-UART TX
+@28
+tb.i_dut.i_uart_tx.clk
+tb.i_dut.i_uart_tx.counter_en
+tb.i_dut.i_uart_tx.counter_rst
+@22
+tb.i_dut.i_uart_tx.n_tx_state[3:0]
+@28
+tb.i_dut.i_uart_tx.resetn
+@22
+tb.i_dut.i_uart_tx.sample_counter[7:0]
+@29
+tb.i_dut.i_uart_tx.tx_busy
+@22
+tb.i_dut.i_uart_tx.tx_data[7:0]
+tb.i_dut.i_uart_tx.tx_data_reg[7:0]
+@28
+tb.i_dut.i_uart_tx.tx_enable
+@22
+tb.i_dut.i_uart_tx.tx_state[3:0]
+@28
+tb.i_dut.i_uart_tx.uart_txd
+@1000200
+-UART TX
+[pattern_trace] 1
+[pattern_trace] 0

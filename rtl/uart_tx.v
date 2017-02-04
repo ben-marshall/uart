@@ -51,8 +51,8 @@ reg [7:0] tx_data_reg;
 
 //
 // Current and next states for the FSM.
-reg  [3:0] tx_state;
-wire [3:0] n_tx_state;
+reg [3:0] tx_state;
+reg [3:0] n_tx_state;
 
 //
 // Tell other modules when we are busy sending stuff.
@@ -68,7 +68,7 @@ assign counter_rst  = tx_state != n_tx_state;
 always @(*) begin : p_tx_next_state
     n_tx_state = FSM_START;
 
-    case(recv_state)
+    case(tx_state)
         FSM_WAIT: begin
             if(tx_enable) begin
                 n_tx_state = FSM_START;
@@ -116,7 +116,7 @@ always @(*) begin : p_tx_next_state
                                                            : FSM_BIT_7;
         end
         FSM_STOP : begin
-            n_tx_state = sample_counter == SAMPLES_PER_BIT ? FSM_START
+            n_tx_state = sample_counter == SAMPLES_PER_BIT ? FSM_WAIT 
                                                            : FSM_STOP ;
         end
         default: 

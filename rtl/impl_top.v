@@ -20,20 +20,25 @@ output [2:0] rgb2  ,   // RGB Led 2.
 output [2:0] rgb3  ,   // RGB Led 3.
 output [3:0] led   ,   // Green Leds
 input  [3:0] btn   ,   // PTM Buttons.
-input   wire uart_rxd       // UART Recieve pin.
+input   wire uart_rxd, // UART Recieve pin.
+output  wire uart_txd  // UART transmit pin.
 );
+
+// Clock frequency in hertz.
+localparam CLK_HZ = 100000000;
 
 wire        break;
 wire [7:0]  data;
 wire        valid;
+wire        tx_busy;
 
 reg [7:0] leds;
 
 assign led  =    leds[3:0];
-assign rgb0 = {3{leds[4]}};
-assign rgb1 = {3{leds[5]}};
-assign rgb2 = {3{leds[6]}};
-assign rgb3 = {3{leds[7]}};
+assign rgb0 = {2{leds[4], tx_busy}};
+assign rgb1 = {2{leds[5], tx_busy}};
+assign rgb2 = {2{leds[6], tx_busy}};
+assign rgb3 = {2{leds[7], tx_busy}};
 
 
 always @(posedge clk, negedge resetn) begin : p_top_outputs
@@ -46,7 +51,9 @@ end
 
 //
 // Instance the reciever.
-uart_rx i_uart_rx(
+uart_rx #(
+   .CLK_HZ(CLK_HZ)
+) i_uart_rx(
 .clk        (clk        ),   // Top level system clock input.
 .resetn     (resetn     ),   // Asynchronous active low reset.
 .uart_rxd   (uart_rxd   ),   // UART Recieve pin.
@@ -54,6 +61,19 @@ uart_rx i_uart_rx(
 .break      (break      ),   // Did we get a BREAK message?
 .recv_valid (valid      ),   // Valid data recieved and available.
 .recv_data  (data       )    // The recieved data.
+);
+
+//
+// Instance the transmitter
+uart_tx #(
+   .CLK_HZ(CLK_HZ)
+)  i_uart_tx(
+.clk        (clk        ),   // Top level system clock input.
+.resetn     (resetn     ),   // Asynchronous active low reset.
+.uart_txd   (uart_txd   ),   // UART transmit pin.
+.tx_busy    (tx_busy    ),   // Module busy sending previous item.
+.tx_enable  (valid      ),   // Valid data recieved and available.
+.tx_data    (data       )    // The recieved data.
 );
 
 
