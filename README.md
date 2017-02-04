@@ -16,6 +16,9 @@ I have tested it with a Xilinx Artix-7 FPGA using the Arty Development board
 from Digilent. It runs happily using a 50MHz clock and so long as you buffer
 the input and output pins properly, should be able to run much faster.
 
+This isn't the smallest or the fastest UART implementation around, but it
+should be the easiest to integrated into a project.
+
 ## Tools
 
 - [Icarus Verilog](http://iverilog.icarus.com/)
