@@ -61,7 +61,7 @@ initial begin
     $dumpvars(0,tb);
     
     for(bytes = 0; bytes <255; bytes = bytes + 1) begin
-        #500
+        #5000
         send_byte(bytes);
         if(p_bytes == tb.i_dut.data) begin
             $display("[PASS]");

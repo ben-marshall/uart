@@ -27,6 +27,7 @@ localparam [7:0] SAMPLES_THRESHOLD = SAMPLES_PER_BIT / 2;
 
 //
 // Control FSM State encodings.
+localparam FSM_WAIT = 4'b1100;
 localparam FSM_START= 4'b0000;
 localparam FSM_BIT_0= 4'b0001;
 localparam FSM_BIT_1= 4'b0010;
@@ -48,6 +49,9 @@ reg [7:0] int_data;
 // Counts samples per bit
 reg [7:0] sample_counter;
 
+// Keeps track of seeing a fall in the RX value so we can start counting.
+reg       rx_fall_seen;
+
 // Enable the value and sample counters.
 wire      counter_en;
 wire      counter_rst;
@@ -61,7 +65,7 @@ wire      recieved_value = value_counter >= SAMPLES_THRESHOLD;
 //
 // When should we let the counters increment?
 assign counter_en = (recv_state == FSM_START && !uart_rxd) ||
-                    (recv_state != FSM_START             )  ;
+                    (recv_state != FSM_WAIT              )  ;
 
 //
 // When should the counters reset?
@@ -76,6 +80,19 @@ assign counter_rst = (recv_state != n_recv_state        ) ||
 // Let the world know we recieved a byte.
 assign recv_valid = recv_state == FSM_STOP;
 assign break      = recv_state == FSM_STOP && recv_data == 8'b0;
+
+//
+// Process for checking if we have seen a fall in the rx line which might
+// indicate the start of a transaction.
+always @(posedge clk, negedge resetn) begin : p_seen_rx_fall
+    if(!resetn) begin
+        rx_fall_seen <= 1'b0;
+    end else if(recv_state == FSM_WAIT && !uart_rxd) begin
+        rx_fall_seen <= 1'b1;
+    end else if (n_recv_state == FSM_WAIT) begin
+        rx_fall_seen <= 1'b0;
+    end
+end
 
 //
 // Process for latching the captured data to the outputs.
@@ -114,11 +131,19 @@ always @(*) begin : p_uart_fsm_next_state
     n_recv_state = FSM_START;
 
     case(recv_state)
-        
+        FSM_WAIT: begin
+            if(rx_fall_seen) begin
+                n_recv_state = FSM_START;
+            end else begin
+                n_recv_state = FSM_WAIT;
+            end
+        end
         FSM_START: begin
             if(sample_counter == SAMPLES_PER_BIT &&
                value_counter  <= SAMPLES_THRESHOLD) begin
                 n_recv_state = FSM_BIT_0;
+            end else if(uart_rxd && sample_counter <= SAMPLES_THRESHOLD) begin
+                n_recv_state = FSM_WAIT;
             end else begin
                 n_recv_state = FSM_START;
             end
@@ -169,7 +194,7 @@ end
 // Process for progressing the recv_state FSM
 always @(posedge clk, negedge resetn) begin : p_uart_fsm_progress
     if(!resetn) begin
-        recv_state <= FSM_START;
+        recv_state <= FSM_WAIT;
     end else begin
         recv_state <= n_recv_state;
     end
