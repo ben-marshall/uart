@@ -7,11 +7,10 @@
 # Clock signal
 
 set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk }]; #IO_L12P_T1_MRCC_35 Sch=gclk[100]
+create_clock -add -name sys_clk_pin -period 20.00 -waveform {0 10} [get_ports {clk}];
 
-#
-# Use this line to specify the frequency and duty cycle for the clock.
-#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clk}];
-
+# Asynchronous active low reset signal.
+set_property -dict { PACKAGE_PIN C2    IOSTANDARD LVCMOS33 } [get_ports { resetn }]; #IO_L12P_T1_MRCC_16 Sch=btn[3]
 
 #Switches
 
@@ -48,6 +47,11 @@ set_property -dict { PACKAGE_PIN C9    IOSTANDARD LVCMOS33 } [get_ports { btn[1]
 set_property -dict { PACKAGE_PIN B9    IOSTANDARD LVCMOS33 } [get_ports { btn[2] }]; #IO_L11N_T1_SRCC_16 Sch=btn[2]
 set_property -dict { PACKAGE_PIN B8    IOSTANDARD LVCMOS33 } [get_ports { btn[3] }]; #IO_L12P_T1_MRCC_16 Sch=btn[3]
 
+
+#USB-UART Interface
+
+#set_property -dict { PACKAGE_PIN D10   IOSTANDARD LVCMOS33 } [get_ports { uart_txd }]; #IO_L19N_T3_VREF_16 Sch=uart_rxd_out
+set_property -dict { PACKAGE_PIN A9    IOSTANDARD LVCMOS33 } [get_ports { uart_rxd }]; #IO_L14N_T2_SRCC_16 Sch=uart_txd_in
 
 ##Pmod Headers
 
@@ -99,11 +103,6 @@ set_property -dict { PACKAGE_PIN B8    IOSTANDARD LVCMOS33 } [get_ports { btn[3]
 #set_property -dict { PACKAGE_PIN H2    IOSTANDARD LVCMOS33 } [get_ports { jd[9] }]; #IO_L15P_T2_DQS_35 Sch=jd[9]
 #set_property -dict { PACKAGE_PIN G2    IOSTANDARD LVCMOS33 } [get_ports { jd[10] }]; #IO_L15N_T2_DQS_35 Sch=jd[10]
 
-
-#USB-UART Interface
-
-#set_property -dict { PACKAGE_PIN D10   IOSTANDARD LVCMOS33 } [get_ports { uart_txd }]; #IO_L19N_T3_VREF_16 Sch=uart_rxd_out
-#set_property -dict { PACKAGE_PIN A9    IOSTANDARD LVCMOS33 } [get_ports { uart_rxd }]; #IO_L14N_T2_SRCC_16 Sch=uart_txd_in
 
 
 ##ChipKit Signals

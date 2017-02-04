@@ -11,20 +11,21 @@
 //
 
 module impl_top (
-input        clk        ,   // Top level system clock input.
+input        clk   ,   // Top level system clock input.
+input        resetn,   // Asynchronous active low reset.
 input  [3:0] sw    ,   // Slide switches.
 output [2:0] rgb0  ,   // RGB Led 0.
 output [2:0] rgb1  ,   // RGB Led 1.
 output [2:0] rgb2  ,   // RGB Led 2.
 output [2:0] rgb3  ,   // RGB Led 3.
 output [3:0] led   ,   // Green Leds
+input  [3:0] btn   ,   // PTM Buttons.
 input   wire uart_rxd       // UART Recieve pin.
 );
 
 wire        break;
 wire [7:0]  data;
 wire        valid;
-wire        resetn = sw[0];
 
 reg [7:0] leds;
 
