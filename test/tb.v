@@ -28,7 +28,7 @@ assign sw    = {2'b0, 1'b0, resetn};
 //
 // Make the clock tick at 50MHz.
 always begin
-    #10 assign clk    = ~clk;
+    #20 assign clk    = ~clk;
 end
 
 task send_byte;
@@ -70,6 +70,9 @@ initial begin
         end
         p_bytes = bytes;
     end
+    
+    $display("SAMPLES/BIT: %d", i_dut.i_uart_rx.SAMPLES_PER_BIT);
+    $display("THRESHOLD  : %d", i_dut.i_uart_rx.SAMPLES_THRESHOLD);
 
     $display("Finish simulation at time %d", $time);
     $finish();

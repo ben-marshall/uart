@@ -25,7 +25,7 @@ output  wire uart_txd  // UART transmit pin.
 );
 
 // Clock frequency in hertz.
-localparam CLK_HZ = 100000000;
+localparam CLK_HZ = 50000000;
 
 wire        break;
 wire [7:0]  data;

@@ -50,7 +50,7 @@ set_property -dict {PACKAGE_PIN B8 IOSTANDARD LVCMOS33} [get_ports {btn[3]}]
 
 #USB-UART Interface
 
-#set_property -dict { PACKAGE_PIN D10   IOSTANDARD LVCMOS33 } [get_ports { uart_txd }]; #IO_L19N_T3_VREF_16 Sch=uart_rxd_out
+set_property -dict { PACKAGE_PIN D10   IOSTANDARD LVCMOS33 } [get_ports { uart_txd }]; #IO_L19N_T3_VREF_16 Sch=uart_rxd_out
 set_property -dict {PACKAGE_PIN A9 IOSTANDARD LVCMOS33} [get_ports uart_rxd]
 
 ##Pmod Headers
@@ -244,19 +244,9 @@ set_property -dict {PACKAGE_PIN A9 IOSTANDARD LVCMOS33} [get_ports uart_rxd]
 #set_property -dict { PACKAGE_PIN B16   IOSTANDARD LVCMOS33 } [get_ports { vsnsvu }]; #IO_L7P_T1_AD2P_15 Sch=vsnsvu
 
 set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports resetn]
-set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 15.000 [get_ports resetn]
+set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports resetn]
 set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports uart_rxd]
-set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 15.000 [get_ports uart_rxd]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 5.000 [get_ports {led[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports {led[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 5.000 [get_ports {rgb0[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports {rgb0[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 5.000 [get_ports {rgb1[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports {rgb1[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 5.000 [get_ports {rgb2[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports {rgb2[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 5.000 [get_ports {rgb3[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports {rgb3[*]}]
+set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports uart_rxd]
 
 
 create_pblock area_pblock
@@ -267,3 +257,20 @@ resize_pblock [get_pblocks area_pblock] -add {SLICE_X0Y119:SLICE_X7Y124}
 
 
 
+
+
+
+
+
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {led[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {led[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb0[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb0[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb1[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb1[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb2[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb2[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb3[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb3[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports uart_txd]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports uart_txd]
