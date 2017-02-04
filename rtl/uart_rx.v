@@ -181,11 +181,11 @@ always @(*) begin : p_uart_fsm_next_state
                                                              : FSM_BIT_7;
         end
         FSM_STOP : begin
-            n_recv_state = sample_counter == SAMPLES_PER_BIT ? FSM_START
+            n_recv_state = sample_counter == SAMPLES_PER_BIT ? FSM_WAIT
                                                              : FSM_STOP ;
         end
         default: 
-            n_recv_state = FSM_START;
+            n_recv_state = FSM_WAIT;
     endcase
 end
 
@@ -216,7 +216,7 @@ end
 
 //
 // Process for controlling the sample counter.
-always @(posedge clk, negedge resetn) begin : p_uart_sample_counter
+always @(posedge clk, negedge resetn) begin : p_uart_rx_sample_counter
     if(!resetn) begin
         sample_counter <= 8'b0;
     end else if (counter_rst) begin
