@@ -132,7 +132,7 @@ always @(*) begin : p_uart_fsm_next_state
 
     case(recv_state)
         FSM_WAIT: begin
-            if(rx_fall_seen) begin
+            if(rx_fall_seen && recv_en) begin
                 n_recv_state = FSM_START;
             end else begin
                 n_recv_state = FSM_WAIT;
