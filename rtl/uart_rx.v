@@ -78,7 +78,7 @@ assign counter_rst = (recv_state != n_recv_state        ) ||
 
 //
 // Let the world know we recieved a byte.
-assign recv_valid = recv_state == FSM_STOP;
+assign recv_valid = recv_state == FSM_STOP && n_recv_state == FSM_WAIT;
 assign break      = recv_state == FSM_STOP && recv_data == 8'b0;
 
 //
