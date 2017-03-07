@@ -1,6 +1,7 @@
 *.swp
 *~
 *.vcd
+*.vim
 
 sim.bin
 
