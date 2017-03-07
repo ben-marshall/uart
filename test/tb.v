@@ -23,7 +23,7 @@ reg  uart_rxd   ;   // UART Recieve pin.
 
 localparam BIT_RATE = 9600;      // Input bit rate of the UART line.
 
-assign sw    = {2'b0, 1'b0, resetn};
+assign sw    = {2'b0, 1'b1, resetn};
 
 //
 // Make the clock tick at 50MHz.
@@ -54,8 +54,8 @@ initial begin
     uart_rxd = 1'b1;
     #40 resetn = 1'b1;
 
-    $display("SAMPLES/BIT: %d", i_dut.i_uart_rx.SAMPLES_PER_BIT);
-    $display("THRESHOLD  : %d", i_dut.i_uart_rx.SAMPLES_THRESHOLD);
+    $display("SAMPLES/BIT: %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
+    $display("THRESHOLD  : %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
     
     $dumpfile("waves.vcd");     
     $dumpvars(0,tb);
@@ -71,8 +71,8 @@ initial begin
         p_bytes = bytes;
     end
     
-    $display("SAMPLES/BIT: %d", i_dut.i_uart_rx.SAMPLES_PER_BIT);
-    $display("THRESHOLD  : %d", i_dut.i_uart_rx.SAMPLES_THRESHOLD);
+    $display("SAMPLES/BIT: %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
+    $display("THRESHOLD  : %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
 
     $display("Finish simulation at time %d", $time);
     $finish();

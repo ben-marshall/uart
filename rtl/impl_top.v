@@ -25,7 +25,8 @@ output  wire uart_txd  // UART transmit pin.
 );
 
 // Clock frequency in hertz.
-localparam CLK_HZ = 50000000;
+parameter CLK_HZ = 50000000;
+parameter BIT_RATE = 9600;
 
 wire        break;
 wire [7:0]  data;
@@ -49,32 +50,15 @@ always @(posedge clk, negedge resetn) begin : p_top_outputs
     end
 end
 
-//
-// Instance the reciever.
-uart_rx #(
-   .CLK_HZ(CLK_HZ)
-) i_uart_rx(
-.clk        (clk        ),   // Top level system clock input.
-.resetn     (resetn     ),   // Asynchronous active low reset.
-.uart_rxd   (uart_rxd   ),   // UART Recieve pin.
-.recv_en    (sw[1]      ),   // Recieve enable
-.break      (break      ),   // Did we get a BREAK message?
-.recv_valid (valid      ),   // Valid data recieved and available.
-.recv_data  (data       )    // The recieved data.
-);
 
-//
-// Instance the transmitter
-uart_tx #(
-   .CLK_HZ(CLK_HZ)
-)  i_uart_tx(
-.clk        (clk        ),   // Top level system clock input.
-.resetn     (resetn     ),   // Asynchronous active low reset.
-.uart_txd   (uart_txd   ),   // UART transmit pin.
-.tx_busy    (tx_busy    ),   // Module busy sending previous item.
-.tx_enable  (valid      ),   // Valid data recieved and available.
-.tx_data    (data       )    // The recieved data.
+uart_periph #(
+.BIT_RATE(BIT_RATE),
+.CLK_HZ  (CLK_HZ  )
+) i_uart_periph (
+.clk      (clk      )  ,   // Top level system clock input.
+.resetn   (resetn   )  ,   // Asynchronous active low reset.
+.uart_rxd (uart_rxd )  ,   // UART Recieve pin.
+.uart_txd (uart_txd )      // UART Transmit pin.
 );
-
 
 endmodule
