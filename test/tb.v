@@ -23,6 +23,22 @@ reg  uart_rxd   ;   // UART Recieve pin.
 
 localparam BIT_RATE = 9600;      // Input bit rate of the UART line.
 
+localparam CMD_WR_MEM_ACCESS_COUNT  = 8'hA0;
+localparam CMD_RD_MEM_ACCESS_COUNT  = 8'hA1;
+
+localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'hB0;
+localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'hB1;
+localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'hB2;
+localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'hB3;
+
+localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'hC0;
+localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'hC1;
+localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'hC2;
+localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'hC3;
+
+localparam CMD_DO_MEM_WRITE         = 8'hD0;
+localparam CMD_DO_MEM_READ          = 8'hD1;
+
 assign sw    = {2'b0, 1'b1, resetn};
 
 //
@@ -31,6 +47,8 @@ always begin
     #20 assign clk    = ~clk;
 end
 
+//
+// Sends a single byte down the UART line.
 task send_byte;
     input [7:0] to_send;
     integer i;
@@ -42,8 +60,32 @@ task send_byte;
             #3520;  uart_rxd = to_send[i];
         end
         #3520;  uart_rxd = 1'b1;
+        #1000;
     end
 endtask
+
+//
+// Writes a register via the UART
+task write_register;
+    input [7:0] register;
+    input [7:0] value   ;
+    begin
+        $display("Write register %d with %h", register, value);
+        send_byte(register);
+        send_byte(value);
+    end
+endtask
+
+//
+// Reads a register via the UART
+task read_register;
+    input [7:0] register;
+    begin
+        $display("Read register: %d", register);
+        send_byte(register);
+    end
+endtask
+
 
 reg [7:0] bytes;
 reg [7:0] p_bytes;
@@ -53,26 +95,32 @@ initial begin
     clk     = 1'b0;
     uart_rxd = 1'b1;
     #40 resetn = 1'b1;
-
-    $display("SAMPLES/BIT: %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
-    $display("THRESHOLD  : %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
     
     $dumpfile("waves.vcd");     
     $dumpvars(0,tb);
     
-    for(bytes = 0; bytes <255; bytes = bytes + 1) begin
-        #5000
-        send_byte(bytes);
-        if(p_bytes == tb.i_dut.data) begin
-            $display("[PASS]");
-        end else if(bytes>1)begin
-            $display("[FAIL]");
-        end
-        p_bytes = bytes;
-    end
+    read_register(CMD_RD_MEM_ACCESS_COUNT );
+    read_register(CMD_RD_MEM_ACCESS_ADDR_0);
+    read_register(CMD_RD_MEM_ACCESS_ADDR_1);
+    read_register(CMD_RD_MEM_ACCESS_ADDR_2);
+    read_register(CMD_RD_MEM_ACCESS_ADDR_3);
     
-    $display("SAMPLES/BIT: %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
-    $display("THRESHOLD  : %d", i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
+    write_register(CMD_WR_MEM_ACCESS_COUNT , 8'h34);
+    write_register(CMD_WR_MEM_ACCESS_ADDR_0, 8'hAB);
+    write_register(CMD_WR_MEM_ACCESS_ADDR_1, 8'hCD);
+    write_register(CMD_WR_MEM_ACCESS_ADDR_2, 8'hEF);
+    write_register(CMD_WR_MEM_ACCESS_ADDR_3, 8'hCD);
+    
+    read_register(CMD_RD_MEM_ACCESS_COUNT );
+    read_register(CMD_RD_MEM_ACCESS_ADDR_0);
+    read_register(CMD_RD_MEM_ACCESS_ADDR_1);
+    read_register(CMD_RD_MEM_ACCESS_ADDR_2);
+    read_register(CMD_RD_MEM_ACCESS_ADDR_3);
+    
+
+    $display("SAMPLES/BIT: %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
+    $display("THRESHOLD  : %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
+    
 
     $display("Finish simulation at time %d", $time);
     $finish();

@@ -99,7 +99,7 @@ end
 always @(posedge clk, negedge resetn) begin : p_uart_data_present
     if(!resetn) begin
         recv_data <= 8'b0;
-    end else if(recv_valid) begin
+    end else if(n_recv_state == FSM_STOP) begin
         recv_data <= int_data;
     end
 end

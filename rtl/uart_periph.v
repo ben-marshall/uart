@@ -27,21 +27,21 @@ parameter   CLK_HZ   = 100000000; // Clock frequency in hertz.
 // Internal parameters and constants
 // 
 
-localparam CMD_WR_MEM_ACCESS_COUNT  = 8'd1;
-localparam CMD_RD_MEM_ACCESS_COUNT  = 8'd2;
+localparam CMD_WR_MEM_ACCESS_COUNT  = 8'hA0;
+localparam CMD_RD_MEM_ACCESS_COUNT  = 8'hA1;
 
-localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'd3;
-localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'd4;
-localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'd5;
-localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'd6;
+localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'hB0;
+localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'hB1;
+localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'hB2;
+localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'hB3;
 
-localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'd7;
-localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'd8;
-localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'd9;
-localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'd10;
+localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'hC0;
+localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'hC1;
+localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'hC2;
+localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'hC3;
 
-localparam CMD_DO_MEM_WRITE         = 8'd11;
-localparam CMD_DO_MEM_READ          = 8'd12;
+localparam CMD_DO_MEM_WRITE         = 8'hD0;
+localparam CMD_DO_MEM_READ          = 8'hD1;
 
 wire         rx_en   ;  // Recieve enable
 wire         rx_break;  // Did we get a BREAK message?
