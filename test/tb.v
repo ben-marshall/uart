@@ -22,6 +22,9 @@ wire [3:0] led  ;   // Green Leds
 reg  uart_rxd   ;   // UART Recieve pin.
 
 localparam BIT_RATE = 9600;      // Input bit rate of the UART line.
+localparam BIT_P    = 3520;
+localparam CLK_HZ   = 100000000;
+localparam CLK_P    = 1000000000 / CLK_HZ;
 
 localparam CMD_WR_MEM_ACCESS_COUNT  = 8'hA0;
 localparam CMD_RD_MEM_ACCESS_COUNT  = 8'hA1;
@@ -44,7 +47,7 @@ assign sw    = {2'b0, 1'b1, resetn};
 //
 // Make the clock tick at 50MHz.
 always begin
-    #20 assign clk    = ~clk;
+    #CLK_P assign clk    = ~clk;
 end
 
 //
@@ -55,11 +58,11 @@ task send_byte;
     begin
         $display("Sending byte: %d at time %d", to_send, $time);
 
-        #3520;  uart_rxd = 1'b0;
+        #BIT_P;  uart_rxd = 1'b0;
         for(i=0; i < 8; i = i+1) begin
-            #3520;  uart_rxd = to_send[i];
+            #BIT_P;  uart_rxd = to_send[i];
         end
-        #3520;  uart_rxd = 1'b1;
+        #BIT_P;  uart_rxd = 1'b1;
         #1000;
     end
 endtask
@@ -118,6 +121,8 @@ initial begin
     read_register(CMD_RD_MEM_ACCESS_ADDR_3);
     
 
+    $display("BIT RATE   : %d",i_dut.i_uart_periph.i_uart_rx.BIT_RATE);
+    $display("CLK Hz     : %d",i_dut.i_uart_periph.i_uart_rx.CLK_HZ);
     $display("SAMPLES/BIT: %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
     $display("THRESHOLD  : %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
     
@@ -128,7 +133,10 @@ end
 
 //
 // Instance the top level implementation module.
-impl_top i_dut(
+impl_top #(
+.BIT_RATE(BIT_RATE),
+.CLK_HZ  (CLK_HZ  )
+) i_dut (
 .clk      (clk     ),   // Top level system clock input.
 .resetn   (resetn  ),
 .sw       (sw      ),   // Slide switches.

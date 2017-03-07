@@ -111,16 +111,15 @@ always @(posedge clk, negedge resetn) begin : p_uart_data_capture
         int_data <= 8'b0;
     end else begin
       case(recv_state)
-          FSM_BIT_0: int_data <= {int_data[7:1], recieved_value                };
+          FSM_BIT_0: int_data <= {int_data[7:1], recieved_value               };
           FSM_BIT_1: int_data <= {int_data[7:2], recieved_value, int_data[0:0]};
           FSM_BIT_2: int_data <= {int_data[7:3], recieved_value, int_data[1:0]};
           FSM_BIT_3: int_data <= {int_data[7:4], recieved_value, int_data[2:0]};
           FSM_BIT_4: int_data <= {int_data[7:5], recieved_value, int_data[3:0]};
           FSM_BIT_5: int_data <= {int_data[7:6], recieved_value, int_data[4:0]};
           FSM_BIT_6: int_data <= {int_data[7:7], recieved_value, int_data[5:0]};
-          FSM_BIT_7: int_data <= {                recieved_value, int_data[6:0]};
-          default:
-              int_data <= int_data;
+          FSM_BIT_7: int_data <= {               recieved_value, int_data[6:0]};
+          default  : int_data <= int_data;
       endcase
     end
 end
