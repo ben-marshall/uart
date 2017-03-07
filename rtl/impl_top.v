@@ -28,25 +28,22 @@ output  wire uart_txd  // UART transmit pin.
 parameter CLK_HZ = 50000000;
 parameter BIT_RATE = 9600;
 
-wire        break;
-wire [7:0]  data;
-wire        valid;
-wire        tx_busy;
+wire [7:0]  uart_dbg;
 
 reg [7:0] leds;
 
 assign led  =    leds[3:0];
-assign rgb0 = {2{leds[4], tx_busy}};
-assign rgb1 = {2{leds[5], tx_busy}};
-assign rgb2 = {2{leds[6], tx_busy}};
-assign rgb3 = {2{leds[7], tx_busy}};
+assign rgb0 = {2'b0,leds[4]};
+assign rgb1 = {2'b0,leds[5]};
+assign rgb2 = {2'b0,leds[6]};
+assign rgb3 = {2'b0,leds[7]};
 
 
 always @(posedge clk, negedge resetn) begin : p_top_outputs
     if(!resetn) begin
         leds <= 8'b0;
-    end else if(valid) begin
-        leds <= data;
+    end else begin
+        leds <= uart_dbg;
     end
 end
 
@@ -56,7 +53,8 @@ uart_periph #(
 .CLK_HZ  (CLK_HZ  )
 ) i_uart_periph (
 .clk      (clk      )  ,   // Top level system clock input.
-.resetn   (resetn   )  ,   // Asynchronous active low reset.
+.resetn   (sw[0]   )  ,   // Asynchronous active low reset.
+.uart_dbg (uart_dbg),
 .uart_rxd (uart_rxd )  ,   // UART Recieve pin.
 .uart_txd (uart_txd )      // UART Transmit pin.
 );

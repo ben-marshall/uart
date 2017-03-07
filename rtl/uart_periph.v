@@ -11,6 +11,7 @@ module uart_periph(
 input  wire         clk        ,   // Top level system clock input.
 input  wire         resetn     ,   // Asynchronous active low reset.
 
+output wire [7:0]   uart_dbg   ,
 input  wire         uart_rxd   ,   // UART Recieve pin.
 output wire         uart_txd       // UART Transmit pin.
 );
@@ -27,18 +28,18 @@ parameter   CLK_HZ   = 100000000; // Clock frequency in hertz.
 // Internal parameters and constants
 // 
 
-localparam CMD_WR_MEM_ACCESS_COUNT  = 8'hA0;
-localparam CMD_RD_MEM_ACCESS_COUNT  = 8'hA1;
+localparam CMD_WR_MEM_ACCESS_COUNT  = 8'h61; // a
+localparam CMD_RD_MEM_ACCESS_COUNT  = 8'h62; // b
 
-localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'hB0;
-localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'hB1;
-localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'hB2;
-localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'hB3;
+localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'h63; // c
+localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'h64; // d
+localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'h65; // e
+localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'h66; // f
 
-localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'hC0;
-localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'hC1;
-localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'hC2;
-localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'hC3;
+localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'h67; // g
+localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'h68; // h
+localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'h69; // i
+localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'h6A; // j
 
 localparam CMD_DO_MEM_WRITE         = 8'hD0;
 localparam CMD_DO_MEM_READ          = 8'hD1;
@@ -100,9 +101,14 @@ assign tx_data   =
     {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_2}} & mem_access_addr[23:16]  |
     {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_1}} & mem_access_addr[15: 8]  |
     {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_0}} & mem_access_addr[ 7: 0]  ;
+    
+assign uart_dbg = {fsm_state==FSM_IDLE,
+                   fsm_state == FSM_RD_MEM_ACCESS_ADDR_0,
+                   fsm_state == FSM_WR_MEM_ACCESS_ADDR_0,
+                   fsm_state!=FSM_IDLE,
+                   4'b0};
 
 
-//
 // Computes the next state of the control FSM.
 //
 always @(*) begin : p_uart_periph_next_state
