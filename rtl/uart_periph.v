@@ -23,31 +23,22 @@ output wire         uart_txd       // UART Transmit pin.
 parameter   BIT_RATE = 9600;      // Input bit rate of the UART line.
 parameter   CLK_HZ   = 100000000; // Clock frequency in hertz.
 
+//
+// FSM States
+parameter   FSM_IDLE    =   0;
+parameter   FSM_WRITE   =   1;
+parameter   FSM_READ    =   2;
 
 // --------------------------------------------------------------------------- 
 // Internal parameters and constants
 // 
 
-localparam CMD_WR_MEM_ACCESS_COUNT  = 8'h61; // a
-localparam CMD_RD_MEM_ACCESS_COUNT  = 8'h62; // b
-
-localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'h63; // c
-localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'h64; // d
-localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'h65; // e
-localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'h66; // f
-
-localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'h67; // g
-localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'h68; // h
-localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'h69; // i
-localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'h6A; // j
-
-localparam CMD_DO_MEM_WRITE         = 8'hD0;
-localparam CMD_DO_MEM_READ          = 8'hD1;
-
-wire         rx_en   ;  // Recieve enable
+wire         rx_en=1 ;  // Recieve enable
 wire         rx_break;  // Did we get a BREAK message?
 wire         rx_valid;  // Valid data recieved and available.
 wire [7:0]   rx_data ;  // The recieved data.
+wire [2:0]   rx_cmd = rx_data[7:5];
+wire [4:0]   rx_arg = rx_data[4:0];
 
 wire         tx_busy  ; // Module busy sending previous item.
 wire         tx_enable; // Valid data recieved and available.
@@ -57,139 +48,67 @@ wire [7:0]   tx_data  ; // The recieved data.
 // Internal registers
 // 
 
-reg  [ 6:0] mem_access_count;   // Down counter for memory accesses.
-reg  [ 7:0] mem_data;           // Data read or written from/to memory.
-reg  [31:0] mem_access_addr;    // Address of the next memory read/write.
+reg [7:0] reg_bank [0:7]; // General register bank.
+
+reg [3:0] reg_addr      ; // Register being read / written.
+reg [3:0] n_reg_addr    ; 
+
+reg [1:0] fsm_state     ; // Current FSM state
+reg [1:0] n_fsm_state   ; // Next FSM state.
 
 // --------------------------------------------------------------------------- 
 // Internal state machine processing.
 // 
 
-localparam FSM_IDLE                 = 5'd0;
-localparam FSM_DECODE_CMD           = 5'd1;
-localparam FSM_WR_MEM_ACCESS_COUNT  = 5'd2;
-localparam FSM_RD_MEM_ACCESS_COUNT  = 5'd3;
-localparam FSM_WR_MEM_ACCESS_ADDR_0 = 5'd4;
-localparam FSM_WR_MEM_ACCESS_ADDR_1 = 5'd5;
-localparam FSM_WR_MEM_ACCESS_ADDR_2 = 5'd6;
-localparam FSM_WR_MEM_ACCESS_ADDR_3 = 5'd7;
-localparam FSM_RD_MEM_ACCESS_ADDR_0 = 5'd8;
-localparam FSM_RD_MEM_ACCESS_ADDR_1 = 5'd9;
-localparam FSM_RD_MEM_ACCESS_ADDR_2 = 5'd10;
-localparam FSM_RD_MEM_ACCESS_ADDR_3 = 5'd11;
+assign tx_enable = !tx_busy && fsm_state == FSM_READ;
+assign tx_data   = reg_bank[reg_addr];
 
-reg  [4:0] fsm_state;
-reg  [4:0] n_fsm_state;
-
-//
-// Always enable the reciever.
-assign rx_en = 1'b1;
-
-//
-// Enable sending of data out via the UART TX
-assign tx_enable = fsm_state == FSM_RD_MEM_ACCESS_COUNT  ||
-                   fsm_state == FSM_RD_MEM_ACCESS_ADDR_0 ||
-                   fsm_state == FSM_RD_MEM_ACCESS_ADDR_1 ||
-                   fsm_state == FSM_RD_MEM_ACCESS_ADDR_2 ||
-                   fsm_state == FSM_RD_MEM_ACCESS_ADDR_3  ;
-
-//
-// What data do we send?
-assign tx_data   = 
-    {8{fsm_state == FSM_RD_MEM_ACCESS_COUNT }} & {1'b0,mem_access_count} |
-    {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_3}} & mem_access_addr[31:24]  |
-    {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_2}} & mem_access_addr[23:16]  |
-    {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_1}} & mem_access_addr[15: 8]  |
-    {8{fsm_state == FSM_RD_MEM_ACCESS_ADDR_0}} & mem_access_addr[ 7: 0]  ;
-    
-assign uart_dbg = {fsm_state==FSM_IDLE,
-                   fsm_state == FSM_RD_MEM_ACCESS_ADDR_0,
-                   fsm_state == FSM_WR_MEM_ACCESS_ADDR_0,
-                   fsm_state!=FSM_IDLE,
-                   4'b0};
-
-
-// Computes the next state of the control FSM.
-//
-always @(*) begin : p_uart_periph_next_state
-
+always @(*) begin: p_n_fsm_state
     n_fsm_state = FSM_IDLE;
+    n_reg_addr  = 4'b0000;
 
-    case (fsm_state)
+    case(fsm_state)
         
         FSM_IDLE: begin
-            n_fsm_state = rx_valid ? FSM_DECODE_CMD : FSM_IDLE;
-        end
-        
-        FSM_DECODE_CMD: begin
-          case(rx_data)
-            CMD_WR_MEM_ACCESS_COUNT : n_fsm_state = FSM_WR_MEM_ACCESS_COUNT ;
-            CMD_RD_MEM_ACCESS_COUNT : n_fsm_state = FSM_RD_MEM_ACCESS_COUNT ;
-            CMD_WR_MEM_ACCESS_ADDR_0: n_fsm_state = FSM_WR_MEM_ACCESS_ADDR_0;
-            CMD_WR_MEM_ACCESS_ADDR_1: n_fsm_state = FSM_WR_MEM_ACCESS_ADDR_1;
-            CMD_WR_MEM_ACCESS_ADDR_2: n_fsm_state = FSM_WR_MEM_ACCESS_ADDR_2;
-            CMD_WR_MEM_ACCESS_ADDR_3: n_fsm_state = FSM_WR_MEM_ACCESS_ADDR_3;
-            CMD_RD_MEM_ACCESS_ADDR_0: n_fsm_state = FSM_RD_MEM_ACCESS_ADDR_0;
-            CMD_RD_MEM_ACCESS_ADDR_1: n_fsm_state = FSM_RD_MEM_ACCESS_ADDR_1;
-            CMD_RD_MEM_ACCESS_ADDR_2: n_fsm_state = FSM_RD_MEM_ACCESS_ADDR_2;
-            CMD_RD_MEM_ACCESS_ADDR_3: n_fsm_state = FSM_RD_MEM_ACCESS_ADDR_3;
-            default                 : n_fsm_state = FSM_IDLE;
-          endcase
-        end
-        
-        FSM_RD_MEM_ACCESS_ADDR_0: begin 
-            n_fsm_state = tx_busy ? FSM_RD_MEM_ACCESS_ADDR_0 : FSM_IDLE;
+            if(rx_valid) begin
+                n_reg_addr = rx_arg[3:0];
+                if(rx_cmd == 3'b010) begin
+                    n_fsm_state <= FSM_WRITE;
+                end else if (rx_cmd == 3'b011) begin
+                    n_fsm_state <= FSM_READ;
+                end
+            end
         end
 
-        FSM_RD_MEM_ACCESS_ADDR_1: begin 
-            n_fsm_state = tx_busy ? FSM_RD_MEM_ACCESS_ADDR_1 : FSM_IDLE;
+        FSM_WRITE: begin
+            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WRITE;
         end
 
-        FSM_RD_MEM_ACCESS_ADDR_2: begin 
-            n_fsm_state = tx_busy ? FSM_RD_MEM_ACCESS_ADDR_2 : FSM_IDLE;
-        end
-
-        FSM_RD_MEM_ACCESS_ADDR_3: begin 
-            n_fsm_state = tx_busy ? FSM_RD_MEM_ACCESS_ADDR_3 : FSM_IDLE;
-        end
-
-        FSM_RD_MEM_ACCESS_COUNT : begin 
-            n_fsm_state = tx_busy ? FSM_RD_MEM_ACCESS_COUNT  : FSM_IDLE;
-        end
-
-        FSM_WR_MEM_ACCESS_ADDR_0: begin
-            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WR_MEM_ACCESS_ADDR_0;
-        end
-
-        FSM_WR_MEM_ACCESS_ADDR_1: begin
-            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WR_MEM_ACCESS_ADDR_1;
-        end
-
-        FSM_WR_MEM_ACCESS_ADDR_2: begin
-            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WR_MEM_ACCESS_ADDR_2;
-        end
-
-        FSM_WR_MEM_ACCESS_ADDR_3: begin
-            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WR_MEM_ACCESS_ADDR_3;
-        end
-
-        FSM_WR_MEM_ACCESS_COUNT : begin
-            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WR_MEM_ACCESS_COUNT;
+        FSM_READ: begin
+            n_fsm_state = tx_busy ? FSM_READ : FSM_IDLE;
         end
 
         default: begin
-            n_fsm_state = FSM_IDLE;
+            n_fsm_state <= FSM_IDLE;
         end
 
     endcase
 
 end
 
+//
+// Progress the register address to the next value.
+always @(posedge clk, negedge resetn) begin : p_reg_addr
+    if(!resetn) begin
+        reg_addr <= 4'b0;
+    end else if(fsm_state == FSM_IDLE) begin
+        reg_addr <= n_reg_addr;
+    end
+end
 
 //
-// Progress the main control / command FSM.
-// 
-always @(posedge clk, negedge resetn) begin : p_uart_periph_fsm_progress
+// Progress the control FSM to the next state.
+always @(posedge clk, negedge resetn) begin : p_fsm_state
     if(!resetn) begin
         fsm_state <= FSM_IDLE;
     end else begin
@@ -198,42 +117,20 @@ always @(posedge clk, negedge resetn) begin : p_uart_periph_fsm_progress
 end
 
 //
-// Updates the memory access address register.
-always @(posedge clk, negedge resetn) begin : p_uart_mem_access_addr
-    if(!resetn) begin
-        mem_access_addr <= 32'b0;
-    end else if (fsm_state == FSM_WR_MEM_ACCESS_ADDR_0 && rx_valid) begin
-        mem_access_addr <= {mem_access_addr[31:24],
-                            mem_access_addr[23:16],
-                            mem_access_addr[15: 8],
-                            rx_data               };
-    end else if (fsm_state == FSM_WR_MEM_ACCESS_ADDR_1 && rx_valid) begin
-        mem_access_addr <= {mem_access_addr[31:24],
-                            mem_access_addr[23:16],
-                            rx_data               ,
-                            mem_access_addr[ 7: 0]};
-    end else if (fsm_state == FSM_WR_MEM_ACCESS_ADDR_2 && rx_valid) begin
-        mem_access_addr <= {mem_access_addr[31:24],
-                            rx_data               ,
-                            mem_access_addr[15: 8],
-                            mem_access_addr[ 7: 0]};
-    end else if (fsm_state == FSM_WR_MEM_ACCESS_ADDR_3 && rx_valid) begin
-        mem_access_addr <= {rx_data               ,
-                            mem_access_addr[23:16],
-                            mem_access_addr[15: 8],
-                            mem_access_addr[ 7: 0]};
+// Read and write the register bank.
+genvar i;
+generate for (i=0; i <8; i = i + 1) begin
+wire [7:0] reg_value = reg_bank[i];
+    always @(posedge clk, negedge resetn) begin : p_reg_bank
+        if(!resetn) begin
+            reg_bank[i] <= 8'b0;
+        end else if (i         == reg_addr  && 
+                     fsm_state == FSM_WRITE && 
+                     rx_valid   ) begin
+            reg_bank[i] <= rx_data;
+        end
     end
-end
-
-//
-// Updates the memory access count register when needed.
-always @(posedge clk, negedge resetn) begin : p_uart_mem_access_count
-    if(!resetn) begin
-        mem_access_count <= 7'b0;
-    end else if (fsm_state == FSM_WR_MEM_ACCESS_COUNT && rx_valid) begin
-        mem_access_count <= rx_data[6:0];
-    end
-end
+end endgenerate
 
 // --------------------------------------------------------------------------- 
 // Sub-module instances.

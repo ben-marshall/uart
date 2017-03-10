@@ -26,22 +26,6 @@ localparam BIT_P    = 3520;
 localparam CLK_HZ   = 100000000;
 localparam CLK_P    = 1000000000 / CLK_HZ;
 
-localparam CMD_WR_MEM_ACCESS_COUNT  = 8'h61; // a
-localparam CMD_RD_MEM_ACCESS_COUNT  = 8'h62; // b
-
-localparam CMD_WR_MEM_ACCESS_ADDR_0 = 8'h63; // c
-localparam CMD_WR_MEM_ACCESS_ADDR_1 = 8'h64; // d
-localparam CMD_WR_MEM_ACCESS_ADDR_2 = 8'h65; // e
-localparam CMD_WR_MEM_ACCESS_ADDR_3 = 8'h66; // f
-
-localparam CMD_RD_MEM_ACCESS_ADDR_0 = 8'h67; // g
-localparam CMD_RD_MEM_ACCESS_ADDR_1 = 8'h68; // h
-localparam CMD_RD_MEM_ACCESS_ADDR_2 = 8'h69; // i
-localparam CMD_RD_MEM_ACCESS_ADDR_3 = 8'h6A; // j
-
-localparam CMD_DO_MEM_WRITE         = 8'hD0;
-localparam CMD_DO_MEM_READ          = 8'hD1;
-
 assign sw    = {2'b0, 1'b1, resetn};
 
 //
@@ -102,24 +86,27 @@ initial begin
     $dumpfile("waves.vcd");     
     $dumpvars(0,tb);
     
-    read_register(CMD_RD_MEM_ACCESS_COUNT );
-    read_register(CMD_RD_MEM_ACCESS_ADDR_0);
-    read_register(CMD_RD_MEM_ACCESS_ADDR_1);
-    read_register(CMD_RD_MEM_ACCESS_ADDR_2);
-    read_register(CMD_RD_MEM_ACCESS_ADDR_3);
+    send_byte("A");
+    send_byte("1");
     
-    write_register(CMD_WR_MEM_ACCESS_COUNT , 8'h34);
-    write_register(CMD_WR_MEM_ACCESS_ADDR_0, 8'hAB);
-    write_register(CMD_WR_MEM_ACCESS_ADDR_1, 8'hCD);
-    write_register(CMD_WR_MEM_ACCESS_ADDR_2, 8'hEF);
-    write_register(CMD_WR_MEM_ACCESS_ADDR_3, 8'hCD);
+    send_byte("B");
+    send_byte("2");
     
-    read_register(CMD_RD_MEM_ACCESS_COUNT );
-    read_register(CMD_RD_MEM_ACCESS_ADDR_0);
-    read_register(CMD_RD_MEM_ACCESS_ADDR_1);
-    read_register(CMD_RD_MEM_ACCESS_ADDR_2);
-    read_register(CMD_RD_MEM_ACCESS_ADDR_3);
+    send_byte("C");
+    send_byte("3");
     
+    send_byte("D");
+    send_byte("4");
+    
+    send_byte(0);
+
+    send_byte("a");
+    send_byte("b");
+    send_byte("c");
+    send_byte("d");
+    
+    send_byte(0);
+    send_byte(0);
 
     $display("BIT RATE   : %d",i_dut.i_uart_periph.i_uart_rx.BIT_RATE);
     $display("CLK Hz     : %d",i_dut.i_uart_periph.i_uart_rx.CLK_HZ);
