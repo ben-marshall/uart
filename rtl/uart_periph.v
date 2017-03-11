@@ -56,12 +56,14 @@ reg [3:0] n_reg_addr    ;
 reg [1:0] fsm_state     ; // Current FSM state
 reg [1:0] n_fsm_state   ; // Next FSM state.
 
+assign uart_dbg = rx_data;
+
 // --------------------------------------------------------------------------- 
 // Internal state machine processing.
 // 
 
-assign tx_enable = !tx_busy && fsm_state == FSM_READ;
-assign tx_data   = reg_bank[reg_addr];
+assign tx_enable = fsm_state == FSM_IDLE;
+assign tx_data   = reg_bank[1];
 
 always @(*) begin: p_n_fsm_state
     n_fsm_state = FSM_IDLE;

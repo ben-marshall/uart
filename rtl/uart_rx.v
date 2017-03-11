@@ -23,7 +23,7 @@ parameter   BIT_RATE = 9600;      // Input bit rate of the UART line.
 parameter   CLK_HZ   = 100000000; // Clock frequency in hertz.
 
 localparam [7:0] SAMPLES_PER_BIT   = CLK_HZ / BIT_RATE;
-localparam [7:0] SAMPLES_THRESHOLD = SAMPLES_PER_BIT / 2;
+localparam [7:0] SAMPLES_THRESHOLD = 3* SAMPLES_PER_BIT / 4;
 
 //
 // Control FSM State encodings.

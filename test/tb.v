@@ -23,7 +23,7 @@ reg  uart_rxd   ;   // UART Recieve pin.
 
 localparam BIT_RATE = 9600;      // Input bit rate of the UART line.
 localparam BIT_P    = 3520;
-localparam CLK_HZ   = 100000000;
+localparam CLK_HZ   =  50000000;
 localparam CLK_P    = 1000000000 / CLK_HZ;
 
 assign sw    = {2'b0, 1'b1, resetn};
@@ -108,10 +108,10 @@ initial begin
     send_byte(0);
     send_byte(0);
 
-    $display("BIT RATE   : %d",i_dut.i_uart_periph.i_uart_rx.BIT_RATE);
-    $display("CLK Hz     : %d",i_dut.i_uart_periph.i_uart_rx.CLK_HZ);
-    $display("SAMPLES/BIT: %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
-    $display("THRESHOLD  : %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
+    //$display("BIT RATE   : %d",i_dut.i_uart_periph.i_uart_rx.BIT_RATE);
+    //$display("CLK Hz     : %d",i_dut.i_uart_periph.i_uart_rx.CLK_HZ);
+    //$display("SAMPLES/BIT: %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
+    //$display("THRESHOLD  : %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
     
 
     $display("Finish simulation at time %d", $time);

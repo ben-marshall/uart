@@ -5,6 +5,7 @@
 
 sim.bin
 
+__pycache__/
 xilinx/
 .Xil/
 vivado*
