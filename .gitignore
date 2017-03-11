@@ -5,6 +5,7 @@
 
 sim.bin
 
+work/
 __pycache__/
 xilinx/
 .Xil/

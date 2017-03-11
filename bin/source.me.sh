@@ -6,3 +6,5 @@ echo "Vivado Path: $VIVADO_PATH"
 source $VIVADO_PATH/settings64.sh
 
 echo "Run 'vivado' to start the Vivado suite."
+
+mkdir -p ./work

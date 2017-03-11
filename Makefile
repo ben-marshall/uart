@@ -3,7 +3,7 @@
 all: run
 
 build:
-	iverilog -o ./sim.bin \
+	iverilog -o ./work/sim.bin \
         test/tb.v \
         rtl/impl_top.v \
 	    rtl/uart_periph.v \
@@ -11,4 +11,8 @@ build:
         rtl/uart_tx.v
 
 run: build
-	vvp ./sim.bin
+	vvp ./work/sim.bin
+
+clean:
+	rm -rf ./work
+	mkdir -p ./work
