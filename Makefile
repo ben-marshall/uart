@@ -1,16 +1,17 @@
 
-SRCS_RX = rtl/uart_rx.v \
-          test/tb_rx.v
+SRCS_RX = rtl/uart_rx.v test/tb_rx.v
 OUT_RX  = work/sim-rx.bin
 WAV_RX  = work/waves-rx.vcd
+
+LOG_FILE = work/sim.log
 
 all: $(WAV_RX)
 
 $(OUT_RX) : $(SRCS_RX)
-	iverilog -o $@ $<
+	iverilog -o $@ $(SRCS_RX)
 
 $(WAV_RX$) : $(OUT_RX)
-	vvp $<
+	vvp -l $(LOG_FILE) $<
 
 clean:
 	rm -rf ./work

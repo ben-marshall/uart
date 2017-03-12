@@ -23,10 +23,12 @@ output wire [7:0] uart_rx_data   // The recieved data.
 //
 // Input bit rate of the UART line.
 parameter   BIT_RATE        = 9600;
+localparam  BIT_P           = (1000000000/BIT_RATE);
 
 //
 // Clock frequency in hertz.
-parameter   CLK_HZ          = 100000000;
+parameter   CLK_HZ          = 50000000;
+localparam  CLK_P           = 1000000000/ CLK_HZ;
 
 //
 // Number of data bits recieved per UART packet.
@@ -42,15 +44,15 @@ parameter   STOP_BITS       = 1;
 
 //
 // Size of the registers which store sample counts and bit durations.
-localparam       COUNT_REG_LEN      = 8;
+localparam       COUNT_REG_LEN      = 16;
 
 //
 // Number of clock cycles per uart bit.
-localparam [7:0] CYCLES_PER_BIT     = CLK_HZ / BIT_RATE;
+localparam       CYCLES_PER_BIT     = BIT_P / (CLK_P*2);
 
 //
 // Number of samples that must be a 1 for a bit to be considered a 1.
-localparam [7:0] SAMPLES_THRESHOLD  = 3* CYCLES_PER_BIT / 4;
+localparam       SAMPLES_THRESHOLD  = 3* CYCLES_PER_BIT / 4;
 
 // --------------------------------------------------------------------------- 
 // Internal registers.
@@ -125,9 +127,9 @@ always @(posedge clk, negedge resetn) begin : p_recieved_data
     if(!resetn) begin
         recieved_data <= {PAYLOAD_BITS{1'b0}};
     end else if(fsm_state       == FSM_RECV       && next_bit ) begin
-        recieved_data[0] <= one_counter > SAMPLES_THRESHOLD;
-        for ( i = 1; i < PAYLOAD_BITS; i = i + 1) begin
-            recieved_data[i] <= recieved_data[i-1];
+        recieved_data[PAYLOAD_BITS-1] <= one_counter > SAMPLES_THRESHOLD;
+        for ( i = PAYLOAD_BITS-2; i >= 0; i = i - 1) begin
+            recieved_data[i] <= recieved_data[i+1];
         end
     end
 end
@@ -139,7 +141,7 @@ always @(posedge clk, negedge resetn) begin : p_bit_counter
         bit_counter <= 4'b0;
     end else if(fsm_state != FSM_RECV) begin
         bit_counter <= {COUNT_REG_LEN{1'b0}};
-    end else if(fsm_state == FSM_RECV) begin
+    end else if(fsm_state == FSM_RECV && next_bit) begin
         bit_counter <= bit_counter + 1'b1;
     end
 end

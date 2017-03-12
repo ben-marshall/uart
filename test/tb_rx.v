@@ -24,12 +24,12 @@ wire [7:0] uart_rx_data ; // The recieved data.
 //
 // Bit rate of the UART line we are testing.
 localparam BIT_RATE = 9600;
-localparam BIT_P    = (1/BIT_RATE) * 1000000000;
+localparam BIT_P    = (1000000000/BIT_RATE);
 
 //
 // Period and frequency of the system clock.
 localparam CLK_HZ   = 50000000;
-localparam CLK_P    = 1000000000 / CLK_HZ;
+localparam CLK_P    = 1000000000/ CLK_HZ;
 
 
 //
@@ -48,9 +48,26 @@ task send_byte;
         #BIT_P;  uart_rxd = 1'b0;
         for(i=0; i < 8; i = i+1) begin
             #BIT_P;  uart_rxd = to_send[i];
+
+            $display("    Bit: %d at time %d", i, $time);
         end
         #BIT_P;  uart_rxd = 1'b1;
         #1000;
+    end
+endtask
+
+//
+// Checks that the output of the UART is the value we expect.
+task check_byte;
+    input [7:0] expected_value;
+    begin
+        if(uart_rx_data == expected_value) begin
+            $display("[PASS] Expected %b and got %b", 
+                     expected_value, uart_rx_data);
+        end else begin
+            $display("[FAIL] Expected %b and got %b", 
+                     expected_value, uart_rx_data);
+        end
     end
 endtask
 
@@ -61,36 +78,22 @@ initial begin
     clk     = 1'b0;
     uart_rxd = 1'b1;
     #40 resetn = 1'b1;
-
-    $display("BIT RATE  : %d", BIT_RATE );
-    $display("BIT PERIOD: %d", BIT_P    );
     
     $dumpfile(`WAVES_FILE);
     $dumpvars(0,tb);
 
     uart_rx_en = 1'b1;
     
-    send_byte("A");
-    send_byte("1");
-    
-    send_byte("B");
-    send_byte("2");
-    
-    send_byte("C");
-    send_byte("3");
-    
-    send_byte("D");
-    send_byte("4");
-    
-    send_byte(0);
+    send_byte("A"); check_byte("A");
+    send_byte("B"); check_byte("B");
+    send_byte("C"); check_byte("C");
+    send_byte("D"); check_byte("D");
 
-    send_byte("a");
-    send_byte("b");
-    send_byte("c");
-    send_byte("d");
-    
-    send_byte(0);
-    send_byte(0);
+    $display("BIT RATE  : %db/s", BIT_RATE );
+    $display("BIT PERIOD: %dns" , BIT_P    );
+    $display("CLK PERIOD: %dns" , CLK_P    );
+    $display("CYCLES/BIT: %d"   , i_uart_rx.CYCLES_PER_BIT);
+    $display("THRESHOLD : %d"   , i_uart_rx.SAMPLES_THRESHOLD);
 
     $display("Finish simulation at time %d", $time);
     $finish();
