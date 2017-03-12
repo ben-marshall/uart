@@ -35,13 +35,11 @@ $> sudo apt-get install iverilog gtkwave
 To run the simple testbench, you can use the `Makefile`:
 
 ```sh
-$> make run
+$> make rx tx
 ```
 
-This will create a `sim.bin` file in the top level of the project (if the
-build works) and a `waves.vcd` if the simulation happens. It's a very
-simple testbench that sends 255 bytes to the reciever and looks to see them
-echoed back using the transmitter.
+This will build the separate testbenches for the RX and TX modules, run
+their simulations, and output their wave files to `./work/`
 
 ## Modules
 
@@ -55,19 +53,19 @@ The reciever module.
 
 ```verilog
 module uart_rx(
-input  wire         clk        ,   // Top level system clock input.
-input  wire         resetn     ,   // Asynchronous active low reset.
-
-input  wire         uart_rxd   ,   // UART Recieve pin.
-input  wire         recv_en    ,   // Recieve enable
-
-output wire         break      ,   // Did we get a BREAK message?
-output wire         recv_valid ,   // Valid data recieved and available.
-output reg  [7:0]   recv_data      // The recieved data.
+input                   clk          , // Top level system clock input.
+input                   resetn       , // Asynchronous active low reset.
+input                   uart_rxd     , // UART Recieve pin.
+input                   uart_rx_en   , // Recieve enable
+output                  uart_rx_break, // Did we get a BREAK message?
+output                  uart_rx_valid, // Valid data recieved/available.
+output [PAYLOAD_BITS:0] uart_rx_data   // The recieved data.
 );
 
 parameter   BIT_RATE = 9600;      // Input bit rate of the UART line.
 parameter   CLK_HZ   = 100000000; // Clock frequency in hertz.
+parameter   PAYLOAD_BITS    = 8;  // Number of data bits per UART packet.
+parameter   STOP_BITS       = 1;  // Stop bits per UART packet.
 ```
 
 ### `uart_tx`
@@ -76,16 +74,16 @@ The transmitter module.
 
 ```verilog
 module uart_tx(
-input  wire         clk        ,   // Top level system clock input.
-input  wire         resetn     ,   // Asynchronous active low reset.
-
-output reg          uart_txd   ,   // UART transmit pin.
-
-output wire         tx_busy    ,   // Module busy sending previous item.
-input  wire         tx_enable  ,   // Valid data recieved and available.
-input  wire [7:0]   tx_data        // The recieved data.
+input                     clk         , // Top level system clock input.
+input                     resetn      , // Asynchronous active low reset.
+output                    uart_txd    , // UART transmit pin.
+output                    uart_tx_busy, // Module busy sending previous item.
+input                     uart_tx_en  , // Send the data on uart_tx_data
+input  [PAYLOAD_BITS-1:0] uart_tx_data  // The data to be sent
 );
 
 parameter   BIT_RATE = 9600;      // Input bit rate of the UART line.
 parameter   CLK_HZ   = 100000000; // Clock frequency in hertz.
+parameter   PAYLOAD_BITS    = 8;  // Number of data bits per UART packet.
+parameter   STOP_BITS       = 1;  // Stop bits per UART packet.
 ```
