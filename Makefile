@@ -9,7 +9,10 @@ WAV_TX = work/waves-tx.vcd
 
 LOG_FILE = work/sim.log
 
-all: $(WAV_TX)
+all: rx tx
+
+rx : $(WAV_RX)
+tx : $(WAV_TX)
 
 $(OUT_RX) : $(SRC_RX)
 	iverilog -o $@ $(SRC_RX)
