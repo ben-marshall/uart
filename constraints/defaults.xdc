@@ -10,30 +10,22 @@ set_property -dict {PACKAGE_PIN E3 IOSTANDARD LVCMOS33} [get_ports clk]
 create_clock -period 20.000 -name sys_clk_pin -waveform {0.000 10.000} -add [get_ports clk]
 
 # Asynchronous active low reset signal.
-set_property -dict {PACKAGE_PIN C2 IOSTANDARD LVCMOS33} [get_ports resetn]
+#set_property -dict {PACKAGE_PIN C2 IOSTANDARD LVCMOS33} [get_ports resetn]
 
 #Switches
 
-set_property -dict {PACKAGE_PIN A8 IOSTANDARD LVCMOS33} [get_ports {sw[0]}]
-set_property -dict {PACKAGE_PIN C11 IOSTANDARD LVCMOS33} [get_ports {sw[1]}]
-set_property -dict {PACKAGE_PIN C10 IOSTANDARD LVCMOS33} [get_ports {sw[2]}]
-set_property -dict {PACKAGE_PIN A10 IOSTANDARD LVCMOS33} [get_ports {sw[3]}]
+#set_property -dict {PACKAGE_PIN A8 IOSTANDARD LVCMOS33} [get_ports {sw[0]}]
+#set_property -dict {PACKAGE_PIN C11 IOSTANDARD LVCMOS33} [get_ports {sw[1]}]
+#set_property -dict {PACKAGE_PIN C10 IOSTANDARD LVCMOS33} [get_ports {sw[2]}]
+set_property -dict {PACKAGE_PIN A10 IOSTANDARD LVCMOS33} [get_ports sw]
 
 
 # LEDs
 
-set_property -dict {PACKAGE_PIN E1 IOSTANDARD LVCMOS33} [get_ports {rgb0[2]}]
-set_property -dict {PACKAGE_PIN F6 IOSTANDARD LVCMOS33} [get_ports {rgb0[1]}]
-set_property -dict {PACKAGE_PIN G6 IOSTANDARD LVCMOS33} [get_ports {rgb0[0]}]
-set_property -dict {PACKAGE_PIN G4 IOSTANDARD LVCMOS33} [get_ports {rgb1[2]}]
-set_property -dict {PACKAGE_PIN J4 IOSTANDARD LVCMOS33} [get_ports {rgb1[1]}]
-set_property -dict {PACKAGE_PIN G3 IOSTANDARD LVCMOS33} [get_ports {rgb1[0]}]
-set_property -dict {PACKAGE_PIN H4 IOSTANDARD LVCMOS33} [get_ports {rgb2[2]}]
-set_property -dict {PACKAGE_PIN J2 IOSTANDARD LVCMOS33} [get_ports {rgb2[1]}]
-set_property -dict {PACKAGE_PIN J3 IOSTANDARD LVCMOS33} [get_ports {rgb2[0]}]
-set_property -dict {PACKAGE_PIN K2 IOSTANDARD LVCMOS33} [get_ports {rgb3[2]}]
-set_property -dict {PACKAGE_PIN H6 IOSTANDARD LVCMOS33} [get_ports {rgb3[1]}]
-set_property -dict {PACKAGE_PIN K1 IOSTANDARD LVCMOS33} [get_ports {rgb3[0]}]
+set_property -dict {PACKAGE_PIN E1 IOSTANDARD LVCMOS33} [get_ports rgb0]
+set_property -dict {PACKAGE_PIN G4 IOSTANDARD LVCMOS33} [get_ports rgb1]
+set_property -dict {PACKAGE_PIN H4 IOSTANDARD LVCMOS33} [get_ports rgb2]
+set_property -dict {PACKAGE_PIN K2 IOSTANDARD LVCMOS33} [get_ports rgb3]
 set_property -dict {PACKAGE_PIN H5 IOSTANDARD LVCMOS33} [get_ports {led[0]}]
 set_property -dict {PACKAGE_PIN J5 IOSTANDARD LVCMOS33} [get_ports {led[1]}]
 set_property -dict {PACKAGE_PIN T9 IOSTANDARD LVCMOS33} [get_ports {led[2]}]
@@ -41,16 +33,15 @@ set_property -dict {PACKAGE_PIN T10 IOSTANDARD LVCMOS33} [get_ports {led[3]}]
 
 
 #Buttons
-
-set_property -dict {PACKAGE_PIN D9 IOSTANDARD LVCMOS33} [get_ports {btn[0]}]
-set_property -dict {PACKAGE_PIN C9 IOSTANDARD LVCMOS33} [get_ports {btn[1]}]
-set_property -dict {PACKAGE_PIN B9 IOSTANDARD LVCMOS33} [get_ports {btn[2]}]
-set_property -dict {PACKAGE_PIN B8 IOSTANDARD LVCMOS33} [get_ports {btn[3]}]
+#set_property -dict {PACKAGE_PIN D9 IOSTANDARD LVCMOS33} [get_ports {btn[0]}]
+#set_property -dict {PACKAGE_PIN C9 IOSTANDARD LVCMOS33} [get_ports {btn[1]}]
+#set_property -dict {PACKAGE_PIN B9 IOSTANDARD LVCMOS33} [get_ports {btn[2]}]
+#set_property -dict {PACKAGE_PIN B8 IOSTANDARD LVCMOS33} [get_ports {btn[3]}]
 
 
 #USB-UART Interface
 
-set_property -dict { PACKAGE_PIN D10   IOSTANDARD LVCMOS33 } [get_ports { uart_txd }]; #IO_L19N_T3_VREF_16 Sch=uart_rxd_out
+set_property -dict {PACKAGE_PIN D10 IOSTANDARD LVCMOS33} [get_ports uart_txd]
 set_property -dict {PACKAGE_PIN A9 IOSTANDARD LVCMOS33} [get_ports uart_rxd]
 
 ##Pmod Headers
@@ -243,20 +234,10 @@ set_property -dict {PACKAGE_PIN A9 IOSTANDARD LVCMOS33} [get_ports uart_rxd]
 #set_property -dict { PACKAGE_PIN C12   IOSTANDARD LVCMOS33 } [get_ports { vsns5v[0] }]; #IO_L3P_T0_DQS_AD1P_15 Sch=vsns5v[0]
 #set_property -dict { PACKAGE_PIN B16   IOSTANDARD LVCMOS33 } [get_ports { vsnsvu }]; #IO_L7P_T1_AD2P_15 Sch=vsnsvu
 
-set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports resetn]
-set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports resetn]
+#set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports resetn]
+#set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports resetn]
 set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports uart_rxd]
 set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports uart_rxd]
-
-
-create_pblock area_pblock
-add_cells_to_pblock [get_pblocks area_pblock] -top
-resize_pblock [get_pblocks area_pblock] -add {SLICE_X0Y119:SLICE_X7Y124}
-
-
-
-
-
 
 
 
@@ -264,13 +245,30 @@ resize_pblock [get_pblocks area_pblock] -add {SLICE_X0Y119:SLICE_X7Y124}
 
 set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {led[*]}]
 set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {led[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb0[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb0[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb1[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb1[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb2[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb2[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports {rgb3[*]}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports {rgb3[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports rgb0]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports rgb0]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports rgb1]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports rgb1]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports rgb2]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports rgb2]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports rgb3]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 1.000 [get_ports rgb3]
 set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay 0.000 [get_ports uart_txd]
 set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_ports uart_txd]
+
+
+
+
+
+set_false_path -from [get_pins i_uart_periph/i_uart_tx/txd_reg_reg/C] -to [get_ports uart_txd]
+set_false_path -from [get_pins {leds_reg[3]/C}] -to [get_ports {led[3]}]
+set_false_path -from [get_pins {leds_reg[2]/C}] -to [get_ports {led[2]}]
+set_false_path -from [get_pins {leds_reg[4]/C}] -to [get_ports rgb0]
+set_false_path -from [get_pins {leds_reg[5]/C}] -to [get_ports rgb1]
+
+
+set_false_path -from [get_ports uart_rxd] -to [get_pins i_uart_periph/i_uart_rx/rxd_reg_reg/D]
+set_false_path -from [get_pins {leds_reg[7]/C}] -to [get_ports rgb3]
+set_false_path -from [get_pins {leds_reg[1]/C}] -to [get_ports {led[1]}]
+set_false_path -from [get_pins {leds_reg[0]/C}] -to [get_ports {led[0]}]
+set_false_path -from [get_pins {leds_reg[6]/C}] -to [get_ports rgb2]
