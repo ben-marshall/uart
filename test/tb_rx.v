@@ -43,13 +43,13 @@ task send_byte;
     input [7:0] to_send;
     integer i;
     begin
-        $display("Sending byte: %d at time %d", to_send, $time);
+        //$display("Sending byte: %d at time %d", to_send, $time);
 
         #BIT_P;  uart_rxd = 1'b0;
         for(i=0; i < 8; i = i+1) begin
             #BIT_P;  uart_rxd = to_send[i];
 
-            $display("    Bit: %d at time %d", i, $time);
+            //$display("    Bit: %d at time %d", i, $time);
         end
         #BIT_P;  uart_rxd = 1'b1;
         #1000;
@@ -58,14 +58,20 @@ endtask
 
 //
 // Checks that the output of the UART is the value we expect.
+integer passes = 0;
+integer fails  = 0;
 task check_byte;
     input [7:0] expected_value;
     begin
         if(uart_rx_data == expected_value) begin
-            $display("[PASS] Expected %b and got %b", 
+            passes = passes + 1;
+            $display("%d/%d/%d [PASS] Expected %b and got %b", 
+                     passes,fails,passes+fails,
                      expected_value, uart_rx_data);
         end else begin
-            $display("[FAIL] Expected %b and got %b", 
+            fails  = fails  + 1;
+            $display("%d/%d/%d [FAIL] Expected %b and got %b", 
+                     passes,fails,passes+fails,
                      expected_value, uart_rx_data);
         end
     end
@@ -73,6 +79,7 @@ endtask
 
 //
 // Run the test sequence.
+reg [7:0] to_send;
 initial begin
     resetn  = 1'b0;
     clk     = 1'b0;
@@ -83,17 +90,21 @@ initial begin
     $dumpvars(0,tb);
 
     uart_rx_en = 1'b1;
-    
-    send_byte("A"); check_byte("A");
-    send_byte("B"); check_byte("B");
-    send_byte("C"); check_byte("C");
-    send_byte("D"); check_byte("D");
+
+    repeat(100) begin
+        to_send = $random;
+        send_byte(to_send); check_byte(to_send);
+    end
 
     $display("BIT RATE  : %db/s", BIT_RATE );
     $display("BIT PERIOD: %dns" , BIT_P    );
     $display("CLK PERIOD: %dns" , CLK_P    );
     $display("CYCLES/BIT: %d"   , i_uart_rx.CYCLES_PER_BIT);
     $display("THRESHOLD : %d"   , i_uart_rx.SAMPLES_THRESHOLD);
+
+    $display("Test Results:");
+    $display("    PASSES: %d", passes);
+    $display("    FAILS : %d", fails);
 
     $display("Finish simulation at time %d", $time);
     $finish();
