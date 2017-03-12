@@ -83,7 +83,7 @@ initial begin
     uart_rxd = 1'b1;
     #40 resetn = 1'b1;
     
-    $dumpfile("waves.vcd");     
+    $dumpfile("./work/waves.vcd");     
     $dumpvars(0,tb);
     
     send_byte("A");
@@ -107,12 +107,6 @@ initial begin
     
     send_byte(0);
     send_byte(0);
-
-    //$display("BIT RATE   : %d",i_dut.i_uart_periph.i_uart_rx.BIT_RATE);
-    //$display("CLK Hz     : %d",i_dut.i_uart_periph.i_uart_rx.CLK_HZ);
-    //$display("SAMPLES/BIT: %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_PER_BIT);
-    //$display("THRESHOLD  : %d",i_dut.i_uart_periph.i_uart_rx.SAMPLES_THRESHOLD);
-    
 
     $display("Finish simulation at time %d", $time);
     $finish();

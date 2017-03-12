@@ -1,17 +1,16 @@
 
+SRCS_RX = rtl/uart_rx.v \
+          test/tb_rx.v
+OUT_RX  = work/sim-rx.bin
+WAV_RX  = work/waves-rx.vcd
 
-all: run
+all: $(WAV_RX)
 
-build:
-	iverilog -o ./work/sim.bin \
-        test/tb.v \
-        rtl/impl_top.v \
-	    rtl/uart_periph.v \
-        rtl/uart_rx.v \
-        rtl/uart_tx.v
+$(OUT_RX) : $(SRCS_RX)
+	iverilog -o $@ $<
 
-run: build
-	vvp ./work/sim.bin
+$(WAV_RX$) : $(OUT_RX)
+	vvp $<
 
 clean:
 	rm -rf ./work
