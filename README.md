@@ -41,6 +41,18 @@ $> make rx tx
 This will build the separate testbenches for the RX and TX modules, run
 their simulations, and output their wave files to `./work/`
 
+## Implementation
+
+When implemented on an Arty Development board using the constraints file in
+`./constraints` and the Xilinx default synthesis strategy, the following
+utilisation numbers are reported:
+
+Module  | Slice LUTs | Slice Registers | Slices | LUT as Logic | LUT FF Pairs
+--------|------------|-----------------|--------|--------------|--------------
+`uart_periph` | 88   | 92              | 33     | 88           | 60
+`uart_rx` | 51       | 47              | 26     | 51           | 29
+`uart_tx` | 35       | 31              | 18     | 35           | 21
+
 ## Modules
 
 ### `impl_top`
