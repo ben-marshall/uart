@@ -13,7 +13,7 @@ input  wire       uart_rxd     , // UART Recieve pin.
 input  wire       uart_rx_en   , // Recieve enable
 output wire       uart_rx_break, // Did we get a BREAK message?
 output wire       uart_rx_valid, // Valid data recieved and available.
-output wire [7:0] uart_rx_data   // The recieved data.
+output wire [PAYLOAD_BITS:0] uart_rx_data   // The recieved data.
 );
 
 // --------------------------------------------------------------------------- 
