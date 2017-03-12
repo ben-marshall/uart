@@ -63,8 +63,8 @@ assign uart_dbg = uart_rx_data;
 // Internal state machine processing.
 // 
 
-assign uart_tx_en   = fsm_state == FSM_IDLE && !uart_tx_busy;
-assign uart_tx_data = reg_bank[1];
+assign uart_tx_en   = fsm_state == FSM_READ;
+assign uart_tx_data = reg_bank[reg_addr];
 
 always @(*) begin: p_n_fsm_state
     n_fsm_state = FSM_IDLE;
@@ -76,9 +76,9 @@ always @(*) begin: p_n_fsm_state
             if(uart_rx_valid) begin
                 n_reg_addr = rx_arg[3:0];
                 if(rx_cmd == 3'b010) begin
-                    n_fsm_state <= FSM_WRITE;
+                    n_fsm_state = FSM_WRITE;
                 end else if (rx_cmd == 3'b011) begin
-                    n_fsm_state <= FSM_READ;
+                    n_fsm_state = FSM_READ;
                 end
             end
         end
@@ -92,7 +92,7 @@ always @(*) begin: p_n_fsm_state
         end
 
         default: begin
-            n_fsm_state <= FSM_IDLE;
+            n_fsm_state = FSM_IDLE;
         end
 
     endcase
