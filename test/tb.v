@@ -21,18 +21,23 @@ wire [2:0] rgb3 ;   // RGB Led 3.
 wire [3:0] led  ;   // Green Leds
 reg  uart_rxd   ;   // UART Recieve pin.
 
-localparam BIT_RATE = 9600;      // Input bit rate of the UART line.
-localparam BIT_P    = 3520;
-localparam CLK_HZ   =  50000000;
-localparam CLK_P    = 1000000000 / CLK_HZ;
+//
+// Bit rate of the UART line we are testing.
+localparam BIT_RATE = 9600;
+localparam BIT_P    = (1000000000/BIT_RATE);
+
+//
+// Period and frequency of the system clock.
+localparam CLK_HZ   = 50000000;
+localparam CLK_P    = 1000000000/ CLK_HZ;
 
 assign sw    = {2'b0, 1'b1, resetn};
 
+
 //
-// Make the clock tick at 50MHz.
-always begin
-    #CLK_P assign clk    = ~clk;
-end
+// Make the clock tick.
+always begin #CLK_P assign clk    = ~clk; end
+
 
 //
 // Sends a single byte down the UART line.
@@ -40,11 +45,13 @@ task send_byte;
     input [7:0] to_send;
     integer i;
     begin
-        $display("Sending byte: %d at time %d", to_send, $time);
+        //$display("Sending byte: %d at time %d", to_send, $time);
 
         #BIT_P;  uart_rxd = 1'b0;
         for(i=0; i < 8; i = i+1) begin
             #BIT_P;  uart_rxd = to_send[i];
+
+            //$display("    Bit: %d at time %d", i, $time);
         end
         #BIT_P;  uart_rxd = 1'b1;
         #1000;
@@ -83,7 +90,7 @@ initial begin
     uart_rxd = 1'b1;
     #40 resetn = 1'b1;
     
-    $dumpfile("./work/waves.vcd");     
+    $dumpfile("./work/waves-sys.vcd");     
     $dumpvars(0,tb);
     
     send_byte("A");

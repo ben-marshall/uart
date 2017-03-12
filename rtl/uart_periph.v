@@ -33,16 +33,17 @@ parameter   FSM_READ    =   2;
 // Internal parameters and constants
 // 
 
-wire         rx_en=1 ;  // Recieve enable
-wire         rx_break;  // Did we get a BREAK message?
-wire         rx_valid;  // Valid data recieved and available.
-wire [7:0]   rx_data ;  // The recieved data.
-wire [2:0]   rx_cmd = rx_data[7:5];
-wire [4:0]   rx_arg = rx_data[4:0];
+wire       uart_rx_en=1 ; // Recieve enable
+wire       uart_rx_break; // Did we get a BREAK message?
+wire       uart_rx_valid; // Valid data recieved and available.
+wire [7:0] uart_rx_data ; // The recieved data.
 
-wire         tx_busy  ; // Module busy sending previous item.
-wire         tx_enable; // Valid data recieved and available.
-wire [7:0]   tx_data  ; // The recieved data.
+wire [2:0] rx_cmd = uart_rx_data[7:5];
+wire [4:0] rx_arg = uart_rx_data[4:0];
+
+wire       uart_tx_busy ; // Module busy sending previous item.
+wire       uart_tx_en   ; 
+wire [7:0] uart_tx_data ; // The recieved data.
 
 // --------------------------------------------------------------------------- 
 // Internal registers
@@ -56,14 +57,14 @@ reg [3:0] n_reg_addr    ;
 reg [1:0] fsm_state     ; // Current FSM state
 reg [1:0] n_fsm_state   ; // Next FSM state.
 
-assign uart_dbg = rx_data;
+assign uart_dbg = uart_rx_data;
 
 // --------------------------------------------------------------------------- 
 // Internal state machine processing.
 // 
 
-assign tx_enable = fsm_state == FSM_IDLE;
-assign tx_data   = reg_bank[1];
+assign uart_tx_en   = fsm_state == FSM_IDLE && !uart_tx_busy;
+assign uart_tx_data = reg_bank[1];
 
 always @(*) begin: p_n_fsm_state
     n_fsm_state = FSM_IDLE;
@@ -72,7 +73,7 @@ always @(*) begin: p_n_fsm_state
     case(fsm_state)
         
         FSM_IDLE: begin
-            if(rx_valid) begin
+            if(uart_rx_valid) begin
                 n_reg_addr = rx_arg[3:0];
                 if(rx_cmd == 3'b010) begin
                     n_fsm_state <= FSM_WRITE;
@@ -83,11 +84,11 @@ always @(*) begin: p_n_fsm_state
         end
 
         FSM_WRITE: begin
-            n_fsm_state = rx_valid ? FSM_IDLE : FSM_WRITE;
+            n_fsm_state = uart_rx_valid ? FSM_IDLE : FSM_WRITE;
         end
 
         FSM_READ: begin
-            n_fsm_state = tx_busy ? FSM_READ : FSM_IDLE;
+            n_fsm_state = uart_tx_busy ? FSM_READ : FSM_IDLE;
         end
 
         default: begin
@@ -128,8 +129,8 @@ wire [7:0] reg_value = reg_bank[i];
             reg_bank[i] <= 8'b0;
         end else if (i         == reg_addr  && 
                      fsm_state == FSM_WRITE && 
-                     rx_valid   ) begin
-            reg_bank[i] <= rx_data;
+                     uart_rx_valid   ) begin
+            reg_bank[i] <= uart_rx_data;
         end
     end
 end endgenerate
@@ -145,13 +146,13 @@ uart_rx #(
 .BIT_RATE(BIT_RATE),
 .CLK_HZ  (CLK_HZ  )
 ) i_uart_rx(
-.clk       (clk       ) ,   // Top level system clock input.
-.resetn    (resetn    ) ,   // Asynchronous active low reset.
-.uart_rxd  (uart_rxd  ) ,   // UART Recieve pin.
-.recv_en   (rx_en     ) ,   // Recieve enable
-.break     (rx_break  ) ,   // Did we get a BREAK message?
-.recv_valid(rx_valid  ) ,   // Valid data recieved and available.
-.recv_data (rx_data   )     // The recieved data.
+.clk          (clk          ), // Top level system clock input.
+.resetn       (resetn       ), // Asynchronous active low reset.
+.uart_rxd     (uart_rxd     ), // UART Recieve pin.
+.uart_rx_en   (uart_rx_en   ), // Recieve enable
+.uart_rx_break(uart_rx_break), // Did we get a BREAK message?
+.uart_rx_valid(uart_rx_valid), // Valid data recieved and available.
+.uart_rx_data (uart_rx_data )  // The recieved data.
 );
 
 
@@ -162,12 +163,12 @@ uart_tx #(
 .BIT_RATE(BIT_RATE),
 .CLK_HZ  (CLK_HZ  )
 ) i_uart_tx(
-.clk       (clk       ) ,   // Top level system clock input.
-.resetn    (resetn    ) ,   // Asynchronous active low reset.
-.uart_txd  (uart_txd  ) ,   // UART Recieve pin.
-.tx_busy   (tx_busy   ) ,   // Module busy sending previous item.
-.tx_enable (tx_enable ) ,   // Valid data recieved and available.
-.tx_data   (tx_data   )     // The recieved data.
+.clk          (clk          ),
+.resetn       (resetn       ),
+.uart_txd     (uart_txd     ),
+.uart_tx_en   (uart_tx_en   ),
+.uart_tx_busy (uart_tx_busy ),
+.uart_tx_data (uart_tx_data ) 
 );
 
 endmodule
