@@ -23,7 +23,7 @@ reg  uart_rxd   ;   // UART Recieve pin.
 
 //
 // Bit rate of the UART line we are testing.
-localparam BIT_RATE = 9600;
+localparam BIT_RATE = 11520;
 localparam BIT_P    = (1000000000/BIT_RATE);
 
 //
@@ -45,7 +45,7 @@ task send_byte;
     input [7:0] to_send;
     integer i;
     begin
-        //$display("Sending byte: %d at time %d", to_send, $time);
+        $display("Sending byte: %d, %b at time %d", to_send,to_send, $time);
 
         #BIT_P;  uart_rxd = 1'b0;
         for(i=0; i < 8; i = i+1) begin
@@ -126,11 +126,7 @@ impl_top #(
 .CLK_HZ  (CLK_HZ  )
 ) i_dut (
 .clk      (clk     ),   // Top level system clock input.
-.sw       (sw      ),   // Slide switches.
-.rgb0     (rgb0    ),   // RGB Led 0.
-.rgb1     (rgb1    ),   // RGB Led 1.
-.rgb2     (rgb2    ),   // RGB Led 2.
-.rgb3     (rgb3    ),   // RGB Led 3.
+.sw_0     (sw      ),   // Slide switches.
 .led      (led     ),   // Green Leds
 .uart_rxd (uart_rxd)    // UART Recieve pin.
 );

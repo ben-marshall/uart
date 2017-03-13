@@ -23,7 +23,7 @@ wire [7:0] uart_rx_data ; // The recieved data.
 
 //
 // Bit rate of the UART line we are testing.
-localparam BIT_RATE = 9600;
+localparam BIT_RATE = 115200;
 localparam BIT_P    = (1000000000/BIT_RATE);
 
 //
