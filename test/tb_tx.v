@@ -33,7 +33,7 @@ localparam CLK_P    = 1000000000/ CLK_HZ;
 
 //
 // Make the clock tick.
-always begin #CLK_P assign clk    = ~clk; end
+always begin #CLK_P/2 assign clk    = ~clk; end
 
 
 //

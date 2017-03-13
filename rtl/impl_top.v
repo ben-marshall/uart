@@ -26,35 +26,40 @@ output  wire uart_txd  // UART transmit pin.
 parameter CLK_HZ = 50000000;
 parameter BIT_RATE = 9600;
 
-wire [7:0]  uart_dbg;
-
-reg [7:0] leds;
-
-assign led  =    leds[3:0];
-assign rgb0 = {2'b0,leds[4]};
-assign rgb1 = {2'b0,leds[5]};
-assign rgb2 = {2'b0,leds[6]};
-assign rgb3 = {2'b0,leds[7]};
+wire [7:0]  uart_rx_data;
+wire        uart_rx_valid;
+wire        uart_rx_break;
 
 
-always @(posedge clk, negedge sw) begin : p_top_outputs
-    if(!sw) begin
-        leds <= 8'b0;
-    end else begin
-        leds <= uart_dbg;
-    end
-end
-
-
-uart_periph #(
+//
+// Instance of the DUT
+uart_rx #(
 .BIT_RATE(BIT_RATE),
 .CLK_HZ  (CLK_HZ  )
-) i_uart_periph (
-.clk      (clk      ),   // Top level system clock input.
-.resetn   (sw       ),   // Asynchronous active low reset.
-.uart_dbg (uart_dbg ),
-.uart_rxd (uart_rxd ),   // UART Recieve pin.
-.uart_txd (uart_txd )    // UART Transmit pin.
+) i_uart_rx(
+.clk          (clk          ), // Top level system clock input.
+.resetn       (sw           ), // Asynchronous active low reset.
+.uart_rxd     (uart_rxd     ), // UART Recieve pin.
+.uart_rx_en   ( 1'b1        ), // Recieve enable
+.uart_rx_break(uart_rx_break), // Did we get a BREAK message?
+.uart_rx_valid(uart_rx_valid), // Valid data recieved and available.
+.uart_rx_data (uart_rx_data )  // The recieved data.
 );
+
+//
+// UART Transmitter module.
+//
+uart_tx #(
+.BIT_RATE(BIT_RATE),
+.CLK_HZ  (CLK_HZ  )
+) i_uart_tx(
+.clk          (clk          ),
+.resetn       (sw           ),
+.uart_txd     (uart_txd     ),
+.uart_tx_en   (uart_rx_valid),
+.uart_tx_busy (             ),
+.uart_tx_data (uart_rx_data ) 
+);
+
 
 endmodule

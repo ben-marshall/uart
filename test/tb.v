@@ -36,7 +36,7 @@ assign sw    = {2'b0, 1'b1, resetn};
 
 //
 // Make the clock tick.
-always begin #CLK_P assign clk    = ~clk; end
+always begin #(CLK_P/2) assign clk    = ~clk; end
 
 
 //

@@ -34,7 +34,7 @@ localparam CLK_P    = 1000000000/ CLK_HZ;
 
 //
 // Make the clock tick.
-always begin #CLK_P assign clk    = ~clk; end
+always begin #(CLK_P/2) assign clk    = ~clk; end
 
 
 //
@@ -91,16 +91,18 @@ initial begin
 
     uart_rx_en = 1'b1;
 
-    repeat(100) begin
+    #1000;
+
+    repeat(10) begin
         to_send = $random;
         send_byte(to_send); check_byte(to_send);
     end
 
-    $display("BIT RATE  : %db/s", BIT_RATE );
-    $display("BIT PERIOD: %dns" , BIT_P    );
-    $display("CLK PERIOD: %dns" , CLK_P    );
-    $display("CYCLES/BIT: %d"   , i_uart_rx.CYCLES_PER_BIT);
-    $display("THRESHOLD : %d"   , i_uart_rx.SAMPLES_THRESHOLD);
+    $display("BIT RATE      : %db/s", BIT_RATE );
+    $display("CLK PERIOD    : %dns" , CLK_P    );
+    $display("CYCLES/BIT    : %d"   , i_uart_rx.CYCLES_PER_BIT);
+    $display("SAMPLE PERIOD : %d", CLK_P *i_uart_rx.CYCLES_PER_BIT);
+    $display("BIT PERIOD    : %dns" , BIT_P    );
 
     $display("Test Results:");
     $display("    PASSES: %d", passes);
