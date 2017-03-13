@@ -48,7 +48,7 @@ localparam       COUNT_REG_LEN      = 16;
 
 //
 // Number of clock cycles per uart bit.
-localparam       CYCLES_PER_BIT     = BIT_P / (CLK_P*2);
+localparam       CYCLES_PER_BIT     = BIT_P / (CLK_P);
 
 //
 // Number of samples that must be a 1 for a bit to be considered a 1.

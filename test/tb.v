@@ -126,7 +126,6 @@ impl_top #(
 .CLK_HZ  (CLK_HZ  )
 ) i_dut (
 .clk      (clk     ),   // Top level system clock input.
-.resetn   (resetn  ),
 .sw       (sw      ),   // Slide switches.
 .rgb0     (rgb0    ),   // RGB Led 0.
 .rgb1     (rgb1    ),   // RGB Led 1.

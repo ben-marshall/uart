@@ -260,15 +260,7 @@ set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 5.000 [get_port
 
 
 
-set_false_path -from [get_pins i_uart_periph/i_uart_tx/txd_reg_reg/C] -to [get_ports uart_txd]
-set_false_path -from [get_pins {leds_reg[3]/C}] -to [get_ports {led[3]}]
-set_false_path -from [get_pins {leds_reg[2]/C}] -to [get_ports {led[2]}]
-set_false_path -from [get_pins {leds_reg[4]/C}] -to [get_ports rgb0]
-set_false_path -from [get_pins {leds_reg[5]/C}] -to [get_ports rgb1]
 
 
-set_false_path -from [get_ports uart_rxd] -to [get_pins i_uart_periph/i_uart_rx/rxd_reg_reg/D]
-set_false_path -from [get_pins {leds_reg[7]/C}] -to [get_ports rgb3]
-set_false_path -from [get_pins {leds_reg[1]/C}] -to [get_ports {led[1]}]
-set_false_path -from [get_pins {leds_reg[0]/C}] -to [get_ports {led[0]}]
-set_false_path -from [get_pins {leds_reg[6]/C}] -to [get_ports rgb2]
+
+
