@@ -13,11 +13,6 @@
 module impl_top (
 input        clk   ,   // Top level system clock input.
 input        sw    ,   // Slide switches.
-output       rgb0  ,   // RGB Led 0.
-output       rgb1  ,   // RGB Led 1.
-output       rgb2  ,   // RGB Led 2.
-output       rgb3  ,   // RGB Led 3.
-output [3:0] led   ,   // Green Leds
 input   wire uart_rxd, // UART Recieve pin.
 output  wire uart_txd  // UART transmit pin.
 );
