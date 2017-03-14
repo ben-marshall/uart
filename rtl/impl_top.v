@@ -22,54 +22,92 @@ output  wire [7:0]  led
 // Clock frequency in hertz.
 parameter CLK_HZ = 50000000;
 parameter BIT_RATE = 115200;
+parameter PAYLOAD_BITS = 8;
+parameter STACK_DEPTH =  64;
 
-wire [7:0]  uart_rx_echo_data;
-wire        uart_rx_echo_valid;
-wire        uart_rx_echo_break;
+wire [PAYLOAD_BITS-1:0]  uart_rx_data;
+wire        uart_rx_valid;
+wire        uart_rx_break;
 
-wire [7:0]  uart_rx_led_data;
-wire        uart_rx_led_valid;
-wire        uart_rx_led_break;
+wire        uart_tx_busy;
+wire [PAYLOAD_BITS-1:0]  uart_tx_data;
+wire        uart_tx_en;
 
-reg  [7:0]  led_reg;
+reg  [PAYLOAD_BITS-1:0]  led_reg;
 assign      led = led_reg;
+
+// ------------------------------------------------------------------------- 
+
+reg  [PAYLOAD_BITS-1:0]  stack_data      [0:STACK_DEPTH-1];
+reg  [7:0]  stack_counter   ;
+
+reg         sending_stack;
+
+assign uart_tx_data = stack_counter < STACK_DEPTH ? stack_data[stack_counter]
+                                                  : uart_rx_data;
+assign uart_tx_en   = sending_stack && !uart_tx_busy;
 
 always @(posedge clk, negedge sw_0) begin
     if(!sw_0) begin
-        led_reg <= 8'h11;
-    end else if (uart_rx_led_valid) begin
-        led_reg <= uart_rx_led_data;
+        sending_stack <= 1'b0;
+    end else if(sending_stack) begin
+        sending_stack <= stack_counter != 0;
+    end else begin
+        sending_stack <= stack_counter == STACK_DEPTH;
     end
 end
 
-//
-// UART RX
-uart_rx #(
-.BIT_RATE(BIT_RATE),
-.CLK_HZ  (CLK_HZ  )
-) i_uart_rx_echo(
-.clk          (clk          ), // Top level system clock input.
-.resetn       (sw_0         ), // Asynchronous active low reset.
-.uart_rxd     (uart_rxd     ), // UART Recieve pin.
-.uart_rx_en   ( 1'b1        ), // Recieve enable
-.uart_rx_break(uart_rx_echo_break), // Did we get a BREAK message?
-.uart_rx_valid(uart_rx_echo_valid), // Valid data recieved and available.
-.uart_rx_data (uart_rx_echo_data )  // The recieved data.
-);
+always @(posedge clk, negedge sw_0) begin
+    if(!sw_0) begin
+        stack_counter <= 0;
+    end else if(sending_stack && !uart_tx_busy) begin
+        stack_counter <= stack_counter - 1;
+    end else if(uart_rx_valid && stack_counter < STACK_DEPTH) begin
+        stack_counter <= stack_counter + 1;
+    end
+end
+
+genvar stack_i;
+generate
+    for (stack_i = 0; stack_i < STACK_DEPTH; stack_i = stack_i + 1) 
+    begin : stack_gen_loop
+        always @(posedge clk, negedge sw_0) begin
+            if(!sw_0) begin
+                stack_data[stack_i] <= "0";
+            end else if (stack_counter == stack_i && 
+                         uart_rx_valid            &&
+                         !sending_stack            ) begin
+                stack_data[stack_i] <= uart_rx_data;
+            end
+        end
+    end
+endgenerate
+
+always @(posedge clk, negedge sw_0) begin
+    if(!sw_0) begin
+        led_reg <= 8'hF0;
+    end else begin
+        led_reg <= 8'b10;
+    end
+end
+
+
+// ------------------------------------------------------------------------- 
 
 //
 // UART RX
 uart_rx #(
 .BIT_RATE(BIT_RATE),
+.PAYLOAD_BITS(PAYLOAD_BITS),
 .CLK_HZ  (CLK_HZ  )
-) i_uart_rx_leds(
+) i_uart_rx(
 .clk          (clk          ), // Top level system clock input.
 .resetn       (sw_0         ), // Asynchronous active low reset.
 .uart_rxd     (uart_rxd     ), // UART Recieve pin.
-.uart_rx_en   ( 1'b1        ), // Recieve enable
-.uart_rx_break(uart_rx_led_break), // Did we get a BREAK message?
-.uart_rx_valid(uart_rx_led_valid), // Valid data recieved and available.
-.uart_rx_data (uart_rx_led_data )  // The recieved data.
+.uart_rx_en   (1'b1         ), // Recieve enable
+.uart_rx_break(uart_rx_break), // Did we get a BREAK message?
+.uart_rx_valid(uart_rx_valid), // Valid data recieved and available.
+.uart_rx_data (uart_rx_data )  // The recieved data.
 );
 
 //
@@ -77,14 +115,15 @@ uart_rx #(
 //
 uart_tx #(
 .BIT_RATE(BIT_RATE),
+.PAYLOAD_BITS(PAYLOAD_BITS),
 .CLK_HZ  (CLK_HZ  )
 ) i_uart_tx(
 .clk          (clk          ),
 .resetn       (sw_0         ),
 .uart_txd     (uart_txd     ),
-.uart_tx_en   (uart_rx_echo_valid),
-.uart_tx_busy (             ),
-.uart_tx_data (uart_rx_echo_data ) 
+.uart_tx_en   (uart_tx_en   ),
+.uart_tx_busy (uart_tx_busy ),
+.uart_tx_data (uart_tx_data ) 
 );
 
 
