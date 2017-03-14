@@ -9,7 +9,6 @@ WAV_TX = work/waves-tx.vcd
 
 SRC_SYS = rtl/uart_tx.v \
           rtl/uart_rx.v \
-          rtl/uart_periph.v \
           rtl/impl_top.v \
           test/tb.v
 OUT_SYS = work/sim-sys.bin

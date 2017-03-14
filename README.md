@@ -49,7 +49,6 @@ utilisation numbers are reported:
 
 Module  | Slice LUTs | Slice Registers | Slices | LUT as Logic | LUT FF Pairs
 --------|------------|-----------------|--------|--------------|--------------
-`uart_periph` | 88   | 92              | 33     | 88           | 60
 `uart_rx` | 51       | 47              | 26     | 51           | 29
 `uart_tx` | 35       | 31              | 18     | 35           | 21
 
