@@ -105,7 +105,9 @@ end
 // FSM next state selection.
 // 
 
-wire next_bit     = cycle_counter == CYCLES_PER_BIT;
+wire next_bit     = cycle_counter == CYCLES_PER_BIT ||
+                        fsm_state       == FSM_STOP && 
+                        cycle_counter   == CYCLES_PER_BIT/2;
 wire payload_done = bit_counter   == PAYLOAD_BITS  ;
 
 //
@@ -130,7 +132,9 @@ integer i = 0;
 always @(posedge clk, negedge resetn) begin : p_recieved_data
     if(!resetn) begin
         recieved_data <= {PAYLOAD_BITS{1'b0}};
-    end else if(fsm_state       == FSM_RECV       && next_bit ) begin
+    end else if(fsm_state == FSM_IDLE             ) begin
+        recieved_data <= {PAYLOAD_BITS{1'b0}};
+    end else if(fsm_state == FSM_RECV && next_bit ) begin
         recieved_data[PAYLOAD_BITS-1] <= bit_sample;
         for ( i = PAYLOAD_BITS-2; i >= 0; i = i - 1) begin
             recieved_data[i] <= recieved_data[i+1];

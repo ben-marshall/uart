@@ -86,8 +86,8 @@ endgenerate
 always @(posedge clk, negedge sw_0) begin
     if(!sw_0) begin
         led_reg <= 8'hF0;
-    end else begin
-        led_reg <= 8'b10;
+    end else if(uart_rx_valid) begin
+        led_reg <= {uart_rx_data[3:0],4'b0};
     end
 end
 
