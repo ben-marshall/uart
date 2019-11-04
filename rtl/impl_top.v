@@ -38,13 +38,13 @@ assign      led = led_reg;
 
 // ------------------------------------------------------------------------- 
 
-reg  [PAYLOAD_BITS-1:0]  stack_data      [0:STACK_DEPTH-1];
+// stack_data[0] is always empty: data records from stack_data[1]
+reg  [PAYLOAD_BITS-1:0]  stack_data      [0:STACK_DEPTH];
 reg  [7:0]  stack_counter   ;
 
 reg         sending_stack;
 
-assign uart_tx_data = stack_counter < STACK_DEPTH ? stack_data[stack_counter]
-                                                  : uart_rx_data;
+assign uart_tx_data = stack_data[stack_counter];
 assign uart_tx_en   = sending_stack && !uart_tx_busy;
 
 always @(posedge clk, negedge sw_0) begin
@@ -69,12 +69,12 @@ end
 
 genvar stack_i;
 generate
-    for (stack_i = 0; stack_i < STACK_DEPTH; stack_i = stack_i + 1) 
+  for (stack_i = 0; stack_i <= STACK_DEPTH; stack_i = stack_i + 1) 
     begin : stack_gen_loop
         always @(posedge clk, negedge sw_0) begin
             if(!sw_0) begin
                 stack_data[stack_i] <= "0";
-            end else if (stack_counter == stack_i && 
+            end else if (stack_counter == stack_i-1 && 
                          uart_rx_valid            &&
                          !sending_stack            ) begin
                 stack_data[stack_i] <= uart_rx_data;
