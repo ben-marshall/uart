@@ -21,9 +21,8 @@ output  wire [7:0]  led
 
 // Clock frequency in hertz.
 parameter CLK_HZ = 50000000;
-parameter BIT_RATE = 115200;
+parameter BIT_RATE =   9600;
 parameter PAYLOAD_BITS = 8;
-parameter STACK_DEPTH =  64;
 
 wire [PAYLOAD_BITS-1:0]  uart_rx_data;
 wire        uart_rx_valid;
@@ -38,56 +37,14 @@ assign      led = led_reg;
 
 // ------------------------------------------------------------------------- 
 
-// stack_data[0] is always empty: data records from stack_data[1]
-reg  [PAYLOAD_BITS-1:0]  stack_data      [0:STACK_DEPTH];
-reg  [7:0]  stack_counter   ;
+assign uart_tx_data = uart_rx_data;
+assign uart_tx_en   = uart_rx_valid;
 
-reg         sending_stack;
-
-assign uart_tx_data = stack_data[stack_counter];
-assign uart_tx_en   = sending_stack && !uart_tx_busy;
-
-always @(posedge clk, negedge sw_0) begin
-    if(!sw_0) begin
-        sending_stack <= 1'b0;
-    end else if(sending_stack) begin
-        sending_stack <= stack_counter != 0;
-    end else begin
-        sending_stack <= stack_counter == STACK_DEPTH;
-    end
-end
-
-always @(posedge clk, negedge sw_0) begin
-    if(!sw_0) begin
-        stack_counter <= 0;
-    end else if(sending_stack && !uart_tx_busy) begin
-        stack_counter <= stack_counter - 1;
-    end else if(uart_rx_valid && stack_counter < STACK_DEPTH) begin
-        stack_counter <= stack_counter + 1;
-    end
-end
-
-genvar stack_i;
-generate
-  for (stack_i = 0; stack_i <= STACK_DEPTH; stack_i = stack_i + 1) 
-    begin : stack_gen_loop
-        always @(posedge clk, negedge sw_0) begin
-            if(!sw_0) begin
-                stack_data[stack_i] <= "0";
-            end else if (stack_counter == stack_i-1 && 
-                         uart_rx_valid            &&
-                         !sending_stack            ) begin
-                stack_data[stack_i] <= uart_rx_data;
-            end
-        end
-    end
-endgenerate
-
-always @(posedge clk, negedge sw_0) begin
+always @(posedge clk) begin
     if(!sw_0) begin
         led_reg <= 8'hF0;
     end else if(uart_rx_valid) begin
-        led_reg <= {uart_rx_data[3:0],4'b0};
+        led_reg <= uart_rx_data[7:0];
     end
 end
 

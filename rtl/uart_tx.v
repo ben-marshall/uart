@@ -43,12 +43,12 @@ parameter   STOP_BITS       = 1;
 // 
 
 //
-// Size of the registers which store sample counts and bit durations.
-localparam       COUNT_REG_LEN      = 16;
-
-//
 // Number of clock cycles per uart bit.
 localparam       CYCLES_PER_BIT     = BIT_P / CLK_P;
+
+//
+// Size of the registers which store sample counts and bit durations.
+localparam       COUNT_REG_LEN      = 1+$clog2(CYCLES_PER_BIT);
 
 // --------------------------------------------------------------------------- 
 // Internal registers.
@@ -112,7 +112,7 @@ end
 //
 // Handle updates to the sent data register.
 integer i = 0;
-always @(posedge clk, negedge resetn) begin : p_data_to_send
+always @(posedge clk) begin : p_data_to_send
     if(!resetn) begin
         data_to_send <= {PAYLOAD_BITS{1'b0}};
     end else if(fsm_state == FSM_IDLE && uart_tx_en) begin
@@ -127,7 +127,7 @@ end
 
 //
 // Increments the bit counter each time a new bit frame is sent.
-always @(posedge clk, negedge resetn) begin : p_bit_counter
+always @(posedge clk) begin : p_bit_counter
     if(!resetn) begin
         bit_counter <= 4'b0;
     end else if(fsm_state != FSM_SEND && fsm_state != FSM_STOP) begin
@@ -144,7 +144,7 @@ end
 
 //
 // Increments the cycle counter when sending.
-always @(posedge clk, negedge resetn) begin : p_cycle_counter
+always @(posedge clk) begin : p_cycle_counter
     if(!resetn) begin
         cycle_counter <= {COUNT_REG_LEN{1'b0}};
     end else if(next_bit) begin
@@ -159,7 +159,7 @@ end
 
 //
 // Progresses the next FSM state.
-always @(posedge clk, negedge resetn) begin : p_fsm_state
+always @(posedge clk) begin : p_fsm_state
     if(!resetn) begin
         fsm_state <= FSM_IDLE;
     end else begin
@@ -170,7 +170,7 @@ end
 
 //
 // Responsible for updating the internal value of the txd_reg.
-always @(posedge clk, negedge resetn) begin : p_txd_reg
+always @(posedge clk) begin : p_txd_reg
     if(!resetn) begin
         txd_reg <= 1'b1;
     end else if(fsm_state == FSM_IDLE) begin

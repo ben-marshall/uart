@@ -43,12 +43,12 @@ parameter   STOP_BITS       = 1;
 // 
 
 //
-// Size of the registers which store sample counts and bit durations.
-localparam       COUNT_REG_LEN      = 16;
-
-//
 // Number of clock cycles per uart bit.
 localparam       CYCLES_PER_BIT     = BIT_P / CLK_P;
+
+//
+// Size of the registers which store sample counts and bit durations.
+localparam       COUNT_REG_LEN      = 1+$clog2(CYCLES_PER_BIT);
 
 // -------------------------------------------------------------------------- 
 // Internal registers.
@@ -93,7 +93,7 @@ localparam FSM_STOP = 3;
 assign uart_rx_break = uart_rx_valid && ~|recieved_data;
 assign uart_rx_valid = fsm_state == FSM_STOP && n_fsm_state == FSM_IDLE;
 
-always @(posedge clk, negedge resetn) begin
+always @(posedge clk) begin
     if(!resetn) begin
         uart_rx_data  <= {PAYLOAD_BITS{1'b0}};
     end else if (fsm_state == FSM_STOP) begin
@@ -129,7 +129,7 @@ end
 //
 // Handle updates to the recieved data register.
 integer i = 0;
-always @(posedge clk, negedge resetn) begin : p_recieved_data
+always @(posedge clk) begin : p_recieved_data
     if(!resetn) begin
         recieved_data <= {PAYLOAD_BITS{1'b0}};
     end else if(fsm_state == FSM_IDLE             ) begin
@@ -144,7 +144,7 @@ end
 
 //
 // Increments the bit counter when recieving.
-always @(posedge clk, negedge resetn) begin : p_bit_counter
+always @(posedge clk) begin : p_bit_counter
     if(!resetn) begin
         bit_counter <= 4'b0;
     end else if(fsm_state != FSM_RECV) begin
@@ -156,7 +156,7 @@ end
 
 //
 // Sample the recieved bit when in the middle of a bit frame.
-always @(posedge clk, negedge resetn) begin : p_bit_sample
+always @(posedge clk) begin : p_bit_sample
     if(!resetn) begin
         bit_sample <= 1'b0;
     end else if (cycle_counter == CYCLES_PER_BIT/2) begin
@@ -167,7 +167,7 @@ end
 
 //
 // Increments the cycle counter when recieving.
-always @(posedge clk, negedge resetn) begin : p_cycle_counter
+always @(posedge clk) begin : p_cycle_counter
     if(!resetn) begin
         cycle_counter <= {COUNT_REG_LEN{1'b0}};
     end else if(next_bit) begin
@@ -182,7 +182,7 @@ end
 
 //
 // Progresses the next FSM state.
-always @(posedge clk, negedge resetn) begin : p_fsm_state
+always @(posedge clk) begin : p_fsm_state
     if(!resetn) begin
         fsm_state <= FSM_IDLE;
     end else begin
@@ -193,7 +193,7 @@ end
 
 //
 // Responsible for updating the internal value of the rxd_reg.
-always @(posedge clk, negedge resetn) begin : p_rxd_reg
+always @(posedge clk) begin : p_rxd_reg
     if(!resetn) begin
         rxd_reg     <= 1'b1;
         rxd_reg_0   <= 1'b1;
