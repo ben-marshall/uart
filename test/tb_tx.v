@@ -29,11 +29,12 @@ localparam BIT_P    = (1000000000/BIT_RATE);
 // Period and frequency of the system clock.
 localparam CLK_HZ   = 50000000;
 localparam CLK_P    = 1000000000/ CLK_HZ;
+localparam CLK_P_2    = 500000000/ CLK_HZ;
 
 
 //
 // Make the clock tick.
-always begin #CLK_P/2 assign clk    = ~clk; end
+always #CLK_P_2 clk=~clk;
 
 
 //
@@ -70,7 +71,6 @@ initial begin
     $display("BIT PERIOD: %dns" , BIT_P    );
     $display("CLK PERIOD: %dns" , CLK_P    );
     $display("CYCLES/BIT: %d"   , i_uart_tx.CYCLES_PER_BIT);
-    $display("THRESHOLD : %d"   , i_uart_tx.SAMPLES_THRESHOLD);
 
     $display("Finish simulation at time %d", $time);
     $finish();
